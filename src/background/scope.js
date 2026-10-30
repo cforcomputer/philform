@@ -32,8 +32,9 @@ const ATTR_CUES = [
   ['emergency', /emergency|next[-_ ]?of[-_ ]?kin/],
   ['reference', /(^|[^a-z])(references?|referee|reff)([^a-z]|$)/],
   ['supervisor', /supervisor|manager[-_ ]?(name|phone|email)/],
-  ['education', /education|school|universit|college/],
-  ['employment', /employ|work[-_ ]?(experience|history)|experiences?\[|jobs?\[|positions?\[|previous[-_ ]?(job|employer)/]
+  // Rails' nested rows too: Freshteam's positions_attributes and qualifications_attributes.
+  ['education', /education|school|universit|college|qualifications?_attributes/],
+  ['employment', /employ|work[-_ ]?(experience|history)|experiences?\[|jobs?\[|positions?\[|positions?_attributes|previous[-_ ]?(job|employer)/]
 ];
 
 /** Label wording that places a single field, such as "Employer city". */

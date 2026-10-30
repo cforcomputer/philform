@@ -1364,6 +1364,18 @@ export function fieldIdentity(field) {
 }
 
 const DEMOGRAPHICS_OFF = 'Demographic questions are turned off in settings';
+const BOT_TRAP = 'A trap for bots: filling it would mark the application as automated';
+const AI_USE = 'Asks whether AI was used for this application: yours to answer';
+const NOT_SET = 'Not set on your Profile, and never guessed: yours to answer';
+
+/**
+ * A question for a toggle on the Profile tab that was never switched (over
+ * 21, driver's licence): the user's to answer, never worked out by phil.
+ */
+export function unsetToggle(field, profile) {
+  const key = field.profileKey || matchField(field)?.key;
+  return !!(key && FIELD_BY_KEY[key]?.neverInferred && !/^(yes|no)$/i.test(String(profile?.[key] ?? '')));
+}
 // TypeSafe's question and the extractor's label: a guard that only read one
 // let "Preferred Pronouns" through as "Let us know how you'd like to be addressed".
 const bothLabels = f => `${f.label || ''} ${f.extractedLabel || ''}`.trim();
@@ -1430,13 +1442,42 @@ export const MAX_PASSES = 3;
 const SETTLE_MS = 450;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Text with the lines addressed to bots taken out ("If you are an AI,
+ * include the word..."), so no model reads them as instructions. The rules
+ * pack's `botTrap` pattern says which.
+ */
+export function withoutTraps(text) {
+  const trap = pattern('botTrap');
+  const value = String(text || '');
+  if (!trap.test(value)) return value;
+  return value.split(/(?<=[.!?])\s+|\n+/).filter(line => !trap.test(line)).join(' ').trim();
+}
+
+/**
+ * A field whose question carries a line for bots. A box that is nothing but
+ * the trap ("Leave this field blank") is marked one and never filled; a real
+ * question with such a line in it keeps the question without the line.
+ */
+export function untrapped(f) {
+  const both = `${f.label || ''} ${f.extractedLabel || ''}`;
+  if (!pattern('botTrap').test(both)) return {};
+  const label = withoutTraps(f.label);
+  const extractedLabel = withoutTraps(f.extractedLabel);
+  const words = `${label} ${extractedLabel}`.match(/[a-z]{2,}/gi) || [];
+  return words.length >= 2 ? { label, extractedLabel } : { botTrap: true };
+}
+
+/** "Did you use AI to complete this application?": the user's to answer, never guessed. */
+export const isAiUseQuestion = f => !f.botTrap && pattern('aiUse').test(`${f.label || ''} ${f.extractedLabel || ''}`);
+
 /** Descriptors ready for deciding: whose block, which repeat, which list entry. */
 // A box the form keeps for its own staff (PG&E's "For Employer Use Only"
 // got a written answer) is the rules pack's `officeUse` pattern.
 
 function prepareFields(extraction, profile, used = {}) {
   return pickListEntries(
-    normaliseRepeats(extraction.fields || []).map(f => ({ ...f, scope: scopeOf(f).scope, ...copiedLegalName(f, profile), ...guessedLocation(f, profile),
+    normaliseRepeats(extraction.fields || []).map(f => ({ ...f, ...untrapped(f) })).map(f => ({ ...f, scope: scopeOf(f).scope, ...copiedLegalName(f, profile), ...guessedLocation(f, profile),
       ...(pattern('officeUse').test(`${f.label || ''} ${f.extractedLabel || ''}`) ? { notPart: true } : {}) })),
     extraction.pageText,
     profile,
@@ -1464,7 +1505,13 @@ async function decide(incoming, ctx) {
 
   // Identity questions the user switched off go no further: not to a rule,
   // not to a model, whatever their label (see isIdentityQuestion).
-  const withheld = settings.fillDemographics ? [] : incoming.filter(isIdentityQuestion);
+  // A trap for bots is never filled, and a question about using AI for this
+  // application is never answered for the user, whatever any rule says.
+  const reasonHeld = f => f.botTrap ? BOT_TRAP
+    : (f.type === 'checkbox' || f.type === 'radio' || f.tag === 'select' || f.options?.length) && isAiUseQuestion(f) ? AI_USE
+      : !settings.fillDemographics && isIdentityQuestion(f) ? DEMOGRAPHICS_OFF
+        : unsetToggle(f, profile) ? NOT_SET : null;
+  const withheld = incoming.filter(reasonHeld);
   const fresh = incoming.filter(f => !withheld.includes(f));
 
   // Follow-ups ("Please specify") wait for the question before them, which
@@ -1507,7 +1554,7 @@ async function decide(incoming, ctx) {
   };
 
   const plan = [];
-  const unfilled = withheld.map(f => ({ ...f, reason: DEMOGRAPHICS_OFF }));
+  const unfilled = withheld.map(f => ({ ...f, reason: reasonHeld(f) }));
   /**
    * An identity answer is only ever the user's own saved one: a model's pick
    * for "Gender" from a first name, or a saved "Yes, I identify as LGBTQ+."
@@ -2308,6 +2355,28 @@ function fillItem(f) {
  *
  * @returns {Promise<Map<string, object>>} fill result by field id
  */
+/**
+ * Resolves when the tab has moved on to another page: a fill still running in
+ * the old one will never answer (Jobvite's consent step loads the form when
+ * its residence is chosen, and the fill waited forever). A page that only
+ * changed its address (a single-page app) still holds the fill, and is
+ * waited for as before.
+ */
+function watchPageLeft(tabId, frameId) {
+  let on = null;
+  const left = new Promise(resolve => {
+    on = (id, info) => {
+      if (id !== tabId || info.status !== 'loading') return;
+      setTimeout(async () => {
+        const alive = await runInFrames(tabId, () => typeof globalThis.__applicatorFill === 'function', [], [frameId]).catch(() => []);
+        if (!alive[0]?.result) resolve(true);
+      }, 1000);
+    };
+    chrome.tabs.onUpdated.addListener(on);
+  });
+  return { left, stop: () => chrome.tabs.onUpdated.removeListener(on) };
+}
+
 async function fillPlan(tabId, plan, settings, profile, { scroll }) {
   const results = new Map();
   // A place chosen from a list ("Portland") needs the rest of the address to
@@ -2322,12 +2391,27 @@ async function fillPlan(tabId, plan, settings, profile, { scroll }) {
     }
   }
   for (const [frameId, items] of byFrame(plan)) {
-    const [reply] = await runInFrames(
-      tabId,
-      p => globalThis.__applicatorFill(p),
-      [{ items: items.map(fillItem), highlight: settings.highlightFilled, scroll: scroll && frameId === 0 }],
-      [frameId]
-    );
+    const watch = watchPageLeft(tabId, frameId);
+    let reply;
+    try {
+      [reply] = await Promise.race([
+        runInFrames(
+          tabId,
+          p => globalThis.__applicatorFill(p),
+          [{ items: items.map(fillItem), highlight: settings.highlightFilled, scroll: scroll && frameId === 0 }],
+          [frameId]
+        ),
+        watch.left.then(() => [])
+      ]);
+    } finally {
+      watch.stop();
+    }
+    // Moved on to a new page: the next pass reads and fills that one.
+    if (!reply) {
+      trace('page-left', { frameId, items: items.length });
+      for (const f of items) if (!results.has(f.id)) results.set(f.id, { id: f.id, ok: false, reason: 'The page moved on to its next step while this was filled' });
+      break;
+    }
     for (const r of reply?.result?.results || []) results.set(r.id, r);
     if (reply?.result?.network) trace('network', reply.result.network);
   }
@@ -2441,7 +2525,7 @@ export async function runFill({ tabId, url, onProgress, signal }) {
   // "Add another" is pressed: it is the file attached and the text written from.
   const cvs = (await getDocuments()).resumes || [];
   const choosingCv = chooseResume({ cvs, mainText: profileValue(profile, 'documents.resumeText'),
-    context: extraction.context || {}, settings, tabId, site, signal })
+    context: { ...(extraction.context || {}), jobDescription: withoutTraps(extraction.context?.jobDescription) }, settings, tabId, site, signal })
     .catch(() => ({ doc: cvs[0] || null, text: profileValue(profile, 'documents.resumeText') || '' }));
 
   // How many past jobs to fill. A form asking for five employers is otherwise
@@ -2474,7 +2558,9 @@ export async function runFill({ tabId, url, onProgress, signal }) {
       : 'No fillable form fields found on this page. Open the application form first.');
   }
 
-  const context = extraction.context || {};
+  // A posting's lines for bots never reach a model as instructions.
+  const context = { ...(extraction.context || {}) };
+  if (context.jobDescription) context.jobDescription = withoutTraps(context.jobDescription);
   const firstUploads = extraction.uploads || [];
   // Documents go in first, while the answers are being decided, and nothing is
   // written until their uploads finish: a form that saves an upload over a copy
@@ -2563,7 +2649,7 @@ export async function runFill({ tabId, url, onProgress, signal }) {
     const reverted = pass > 0 ? fields.filter(f => wasCleared(f, lastWritten.get(fieldIdentity(f)))) : [];
     const retry = reverted.filter(f => !retried.has(fieldIdentity(f)));
     for (const f of reverted) if (retried.has(fieldIdentity(f))) lost.add(fieldIdentity(f));
-    trace('extraction', { pass, frames: extraction.frames, blocked: extraction.blocked, fields: fields.map(compactField), fresh: fresh.map(f => f.id), reverted: reverted.map(f => f.id) });
+    trace('extraction', { pass, frames: extraction.frames, blocked: extraction.blocked, honeypots: extraction.skippedTraps || 0, fields: fields.map(compactField), fresh: fresh.map(f => f.id), reverted: reverted.map(f => f.id) });
     if (retry.length) {
       const again = retry.map(f => {
         const before = lastWritten.get(fieldIdentity(f));
@@ -3027,7 +3113,7 @@ async function recordResponseUses(used) {
  */
 async function askUser(tabId, url, unfilled) {
   const items = unfilled.filter(f => f.required && f.selector && f.type !== 'file' && !isAlreadyAnswered(f) &&
-    f.reason !== 'Already answered on the page' && f.reason !== DEMOGRAPHICS_OFF && !isIdentityQuestion(f))
+    f.reason !== 'Already answered on the page' && f.reason !== DEMOGRAPHICS_OFF && f.reason !== BOT_TRAP && !isIdentityQuestion(f))
     .map(f => ({ frameId: f.frameId || 0, selector: f.selector,
       question: cleanLabel(f.label || f.ariaLabel || f.placeholder || '').replace(/\s*[:*]+\s*$/, '') }))
     .filter(i => /[a-z]/i.test(i.question));

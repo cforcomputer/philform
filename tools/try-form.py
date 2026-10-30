@@ -43,6 +43,8 @@ ap.add_argument('--write', action='store_true', help='draft long answers too')
 ap.add_argument('--wait', type=float, default=6, help='seconds to let the page load')
 ap.add_argument('--grant', action='append', default=[], help='a further match pattern to allow, e.g. https://*.greenhouse.io/*')
 ap.add_argument('--probe', action='store_true', help='only read the page, opening dropdowns, and report the fields')
+ap.add_argument('--click', action='append', default=[],
+                help='before filling, press the first visible button or link with this text (e.g. "Apply"); repeatable, in order')
 ap.add_argument('--attach', type=int, help='Marionette port of a running Firefox: fill the page its window shows '
                 'instead of opening URL in a fresh browser, and leave that browser running')
 ap.add_argument('--experiment', help='a script run in the page as a content script; it must set '
@@ -228,6 +230,34 @@ try:
         tab = m.send('WebDriver:NewWindow', {'type': os.environ.get('TRY_AS', 'window')})['handle']
         m.send('WebDriver:SwitchToWindow', {'handle': tab})
         m.send('WebDriver:Navigate', {'url': args.url})
+        time.sleep(args.wait)
+    # A job page whose form opens from a button ("Apply for This Job"): pressed
+    # the way a person would, never a submit button.
+    for words in args.click:
+        hit = m.send('WebDriver:ExecuteScript', {'script': '''
+          const want = arguments[0].toLowerCase();
+          const seen = el => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';
+          const all = [...document.querySelectorAll('a, button, [role=button], input[type=button]')].filter(seen)
+            .filter(el => !(el.type === 'submit' && el.closest('form')));
+          const said = el => (el.innerText || el.value || el.getAttribute('aria-label') || '').replace(/\\s+/g, ' ').trim().toLowerCase();
+          // Some pages draw the button as a plain element with a click handler (UKG's "Apply now").
+          const plain = () => [...document.querySelectorAll('span, div, li')].filter(seen)
+            .filter(el => el.children.length <= 2 && said(el).startsWith(want) && said(el).length <= want.length + 12)
+            .sort((a, b) => a.getBoundingClientRect().width * a.getBoundingClientRect().height - b.getBoundingClientRect().width * b.getBoundingClientRect().height)[0];
+          const el = all.find(el => said(el) === want) || all.find(el => said(el).startsWith(want)) || all.find(el => said(el).includes(want)) || plain();
+          if (!el) return null;
+          el.scrollIntoView({ block: 'center' });
+          return [said(el), el];''', 'args': [words]})['value']
+        if hit:
+            # A real click (pointer down, up, click), as a person's: some pages
+            # ignore a bare click event (ADP, Eightfold).
+            ref = next(iter(hit[1].values()))
+            try:
+                m.send('WebDriver:ElementClick', {'id': ref})
+            except RuntimeError as err:
+                print(f'  (WebDriver click refused: {str(err)[:120]}; clicking from the page instead)')
+                m.send('WebDriver:ExecuteScript', {'script': 'arguments[0].click();', 'args': [hit[1]]})
+        print(f'Pressed "{hit[0]}"' if hit else f'No button or link says "{words}"', flush=True)
         time.sleep(args.wait)
     landed = m.send('WebDriver:GetCurrentURL')['value'] or args.url
     if urlparse(landed).hostname != urlparse(args.url).hostname:

@@ -169,6 +169,9 @@ export const PROFILE_FIELDS = [
     help: 'Separate countries with commas. "European Union" covers every EU country, plus Norway, Iceland, Liechtenstein and Switzerland.',
     suggestions: ['United States', 'United States, European Union', 'European Union', 'Canada', 'United Kingdom', 'United States, Canada'] },
   { key: 'authorization.over18', label: 'At least 18 years old', type: 'boolean', section: 'authorization' },
+  // Toggles: never worked out from anything else. Until switched, a question
+  // about them is left for the user.
+  { key: 'authorization.over21', label: 'At least 21 years old', type: 'boolean', toggle: true, section: 'authorization', neverInferred: true },
 
   // --- compensation -------------------------------------------------------
   { key: 'compensation.desired', label: 'Desired compensation', type: 'text', section: 'compensation', sensitive: true,
@@ -207,6 +210,7 @@ export const PROFILE_FIELDS = [
     help: 'Yes ticks "I agree to the terms / privacy policy" and "I understand" notices. Statements certifying your answers are true are always left for you to tick.' },
 
   // --- screening ------------------------------------------------------------
+  { key: 'screening.driversLicense', label: "Valid driver's licence", type: 'boolean', toggle: true, section: 'screening', neverInferred: true },
   { key: 'screening.everDischarged', label: 'Ever discharged, or resigned in lieu of discharge', type: 'boolean', section: 'screening' },
   { key: 'screening.relatedToEmployee', label: 'Related to an employee of the employer', type: 'boolean', section: 'screening' },
   { key: 'screening.essentialFunctions', label: 'Can perform the essential functions of the job, with or without accommodation', type: 'boolean', section: 'screening' },
@@ -460,7 +464,9 @@ export const IDENTITY_QUESTION = new RegExp([
   'gender', 'transgender', 'sexual orientation', 'neurodiver', '\\blgbt', '\\brace\\b', 'ethnic', 'hispanic', 'latin[oax]\\b',
   'veteran', 'disabilit', 'religio', 'national origin', 'date of birth', '\\bage\\b', 'marital status',
   'african american', 'american indian', 'alaska native', 'pacific islander', 'native hawaiian', '\\basian\\b',
-  'caucasian', 'descendant', 'enslaved', 'ancestry', 'self[- ]identif', 'equal employment', '\\beeo\\b'
+  'caucasian', 'descendant', 'enslaved', 'ancestry', 'self[- ]identif', 'equal employment', '\\beeo\\b',
+  // Canada's employment-equity questions, and service asked as "armed forces".
+  'visible minorit', 'aboriginal', 'first nations', '\\bm[eé]tis\\b', '\\binuit\\b', 'identify as (an? )?indigenous', 'armed forces'
 ].join('|'), 'i');
 // Also the communities lists ("Person with disability", "Neurodiverse", "Veteran", "Refugee or immigrant": Clay).
 const IDENTITY_OPTION = /^(male|female|man|woman|non-?binary|transgender|genderqueer|straight|heterosexual|gay|lesbian|bisexual|asexual|pansexual|queer|hispanic or latino|not hispanic|white|black or african american|asian|person with (a )?disabilit|neurodiver|veteran|refugee|lgbt)/i;

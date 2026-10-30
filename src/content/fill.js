@@ -175,7 +175,23 @@
     el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
   }
 
-  const readBack = el => (el.isContentEditable ? el.textContent : el.value) || '';
+  /**
+   * The editable page of a framed rich-text editor (TinyMCE, CKEditor 4): the
+   * editor hides the real textarea and draws its own document in a frame
+   * beside it, where a person types. Null for anything else.
+   */
+  function framedEditor(el) {
+    if (!el || el.tagName !== 'TEXTAREA' || !el.parentElement) return null;
+    for (const frame of el.parentElement.querySelectorAll('iframe')) {
+      let doc = null;
+      try { doc = frame.contentDocument; } catch { doc = null; }
+      const body = doc?.body;
+      if (body && (body.isContentEditable || doc.designMode === 'on') && frame.getClientRects().length) return body;
+    }
+    return null;
+  }
+
+  const readBack = el => (framedEditor(el)?.textContent ?? (el.isContentEditable ? el.textContent : el.value)) || '';
   const digits = v => String(v || '').replace(/\D/g, '');
 
   /**
@@ -199,6 +215,21 @@
 
   /** Typing into a framework-controlled box: focus, set, announce, blur. */
   function setOnce(el, value) {
+    const editor = framedEditor(el);
+    if (editor) {
+      // Paragraphs in the editor's own page, where the editor reads them from
+      // when the form is sent, and the same text in its textarea.
+      const doc = editor.ownerDocument;
+      editor.replaceChildren(...String(value).split(/\n+/).map(line => {
+        const p = doc.createElement('p');
+        p.textContent = line;
+        return p;
+      }));
+      for (const type of ['input', 'keyup', 'change']) editor.dispatchEvent(new Event(type, { bubbles: true }));
+      nativeSet(el, value);
+      announce(el);
+      return;
+    }
     focusIn(el);
     if (el.isContentEditable) {
       el.textContent = value;
@@ -242,7 +273,7 @@
    */
   function setText(el, value, field = {}) {
     setOnce(el, value);
-    if (accepted(el, value) || el.isContentEditable) return { ok: accepted(el, value) || readBack(el) !== '' };
+    if (accepted(el, value) || el.isContentEditable || framedEditor(el)) return { ok: accepted(el, value) || readBack(el) !== '' };
 
     const tries = [value];
     const phone = /tel/.test(field.type || '') || /phone|mobile|cell/i.test(`${field.label || ''} ${field.name || ''}`);

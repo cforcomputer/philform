@@ -62,9 +62,9 @@ for manifest_path in ROOT.glob('manifest.*.json'):
               f'{name}: unexpected permission "{perm}"')
     # Required hosts are the model APIs only, for direct mode; a release build
     # drops them, since Philform's service answers cross-origin requests. Web
-    # pages are reached through activeTab, or through one origin the user grants
-    # from the popup for a form embedded from another site; that is what the
-    # optional list is for.
+    # pages are reached through activeTab, or through one site the user grants
+    # from the popup: the page's own on its first Fill, or a form embedded from
+    # another site; that is what the optional list is for.
     for host in m.get('host_permissions', []):
         check(host.startswith('https://api.'), f'{name}: unexpected required host "{host}"')
     check(set(m.get('optional_host_permissions', [])) <= {'https://*/*', 'http://*/*'},
@@ -76,6 +76,11 @@ popup_js = (ROOT / 'src/popup/popup.js').read_text()
 # site (boards.greenhouse.io to job-boards.greenhouse.io) is covered.
 check('permissions.request({ origins: [...new Set(blockedOrigins.map(sitePattern))] })' in popup_js,
       'popup.js no longer requests only the blocked frames\' sites')
+# The page's own site, once, on the first Fill there; and nothing else.
+check('chrome.permissions.request({ origins: [siteToAsk] })' in popup_js,
+      'popup.js no longer asks for the page\'s own site on the first Fill')
+check(popup_js.count('permissions.request(') == 2,
+      'popup.js asks for access somewhere new: only the page\'s site and blocked embeds are allowed')
 
 chrome_m = json.loads((ROOT / 'manifest.chrome.json').read_text())
 firefox_m = json.loads((ROOT / 'manifest.firefox.json').read_text())

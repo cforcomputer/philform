@@ -192,6 +192,44 @@
     return !!(label && label.getClientRects().length > 0);
   }
 
+  /**
+   * The editable page of a framed rich-text editor (TinyMCE, CKEditor 4): the
+   * editor hides the real textarea and draws its own document in a frame
+   * beside it, where a person types. Null for anything else.
+   */
+  function framedEditor(el) {
+    if (!el || el.tagName !== 'TEXTAREA' || !el.parentElement) return null;
+    for (const frame of el.parentElement.querySelectorAll('iframe')) {
+      let doc = null;
+      try { doc = frame.contentDocument; } catch { doc = null; }
+      const body = doc?.body;
+      if (body && (body.isContentEditable || doc.designMode === 'on') && frame.getClientRects().length) return body;
+    }
+    return null;
+  }
+
+  /**
+   * A honeypot: a text box drawn where no person can see it (off the page, a
+   * pixel or less, clipped away, or transparent and out of the tab order),
+   * left for bots to fill. Filling one marks the application as a bot's.
+   * Pickers and lists are not judged: some draw a transparent input on purpose.
+   */
+  function isHoneypot(el) {
+    const tag = el.tagName;
+    if (tag !== 'TEXTAREA' && !(tag === 'INPUT' && /^(text|email|url|tel|number|password|)$/i.test(el.getAttribute('type') || ''))) return false;
+    const box = el.getBoundingClientRect();
+    if (box.width <= 1 && box.height <= 1) return true;
+    if (box.right + scrollX <= 0 || box.bottom + scrollY <= 0) return true;
+    for (let n = el, depth = 0; n && n.nodeType === 1 && depth < 6; n = n.parentElement, depth++) {
+      const cs = getComputedStyle(n);
+      if (/rect\(\s*0(px)?[ ,]+0(px)?[ ,]+0(px)?[ ,]+0(px)?\s*\)/.test(cs.clip) && cs.position === 'absolute') return true;
+      if (Number(cs.opacity) === 0 && el.getAttribute('tabindex') === '-1') return true;
+      // Width only: a collapsed section is 0 high and still holds real questions.
+      if (n !== el && n.offsetWidth <= 1 && cs.overflow === 'hidden') return true;
+    }
+    return false;
+  }
+
   /** A role=radio or role=checkbox wrapper whose own native input is hidden. */
   function clickedForHidden(el, role) {
     if (role !== 'radio' && role !== 'checkbox' && role !== 'switch') return false;
@@ -269,6 +307,35 @@
     return withoutCounter(rawLabel(el));
   }
 
+  const QUESTION_NODE = 'legend, [class*="label" i], [class*="question" i], [data-automation-id*="label" i]';
+  const OTHER_BOX = 'input:not([type="hidden"]), select, textarea, [contenteditable="true"], [role="combobox"], [role="radio"], [role="checkbox"]';
+  const before = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  /** The sibling node naming `el` inside `node`: the closest one before it, unless another box sits between. */
+  function nearestQuestionNode(node, el) {
+    // A link or button is an action ("Delete"), never a question; and a row of
+    // a list (a job, a school) is named only from within that row.
+    const row = n => n.closest?.('li, tr');
+    const all = [...node.querySelectorAll(QUESTION_NODE)].filter(c => !c.contains(el) && !c.matches('a, button, [role="button"]') &&
+      (!row(el) || row(c) === row(el) || c.contains(row(el))));
+    if (!all.length) return null;
+    // Across a shadow root, document order says nothing: the first, as it always was.
+    if (all[0].getRootNode() !== el.getRootNode()) return all[0];
+    const ahead = all.filter(c => before(c, el));
+    // One after the box names it only when no box follows: otherwise it is the
+    // next box's question (Breezy's "Start date" after a job's Summary).
+    const candidate = ahead[ahead.length - 1] || all.find(c => before(el, c));
+    if (!candidate) return null;
+    // The same question's own parts: its label's other boxes, the rest of its radio group.
+    const group = n => n.closest?.('[role="radiogroup"], fieldset');
+    const own = c => c === el || c.contains(el) || el.contains(c) ||
+      (!!el.closest?.('label') && c.closest?.('label') === el.closest('label')) ||
+      (!!el.name && c.name === el.name) || (!!group(el) && group(c) === group(el));
+    const between = [...node.querySelectorAll(OTHER_BOX)].some(c => !own(c) && c.getClientRects().length > 0 &&
+      (before(candidate, el) ? before(candidate, c) && before(c, el) : before(el, c)));
+    return between ? null : candidate;
+  }
+
   function rawLabel(el) {
     const labelledBy = el.getAttribute('aria-labelledby');
     if (labelledBy) {
@@ -321,11 +388,14 @@
       }
     }
 
-    // Workday, Lever and similar render the question as a sibling node.
+    // Workday, Lever and similar render the question as a sibling node: the
+    // nearest one before the box with no other box between them. The first in
+    // the wrapper is another box's once the wrapper holds several (Breezy's
+    // added job row put its "Start date" on every box of the form).
     let node = up(el);
     for (let depth = 0; node && node !== document.body && depth < 4; depth++, node = up(node)) {
-      const candidate = node.querySelector('legend, [class*="label" i], [class*="question" i], [data-automation-id*="label" i]');
-      if (candidate && !candidate.contains(el)) {
+      const candidate = nearestQuestionNode(node, el);
+      if (candidate) {
         const value = askingPart(seen(candidate));
         if (value && value.length < 400) return value;
       }
@@ -1216,6 +1286,7 @@
     const readEls = [];
     const claimed = new Set();
     let skippedSensitive = 0;
+    let skippedTraps = 0;
     let index = 0;
 
     for (const el of controls) {
@@ -1238,6 +1309,8 @@
       else if (role === 'combobox' || el.getAttribute('aria-haspopup') === 'listbox') kind = 'listbox';
       else if (el.isContentEditable) {
         if (el.parentElement?.isContentEditable) continue; // inside a larger editor
+        // A framed editor's own page: its textarea, in the page around it, is the question.
+        if (el === document.body && window.frameElement) continue;
         kind = 'richtext';
       } else continue;
 
@@ -1246,13 +1319,15 @@
 
       if (native && tag === 'input' && FORBIDDEN_TYPES.has(type)) continue;
       if (el.disabled || el.getAttribute('aria-disabled') === 'true') continue;
-      if (el.getAttribute('aria-hidden') === 'true') continue;
+      // A framed editor hides its textarea from assistive tech too (TinyMCE).
+      const editor = framedEditor(el);
+      if (el.getAttribute('aria-hidden') === 'true' && !editor) continue;
       // The part of a select2 or Chosen widget that is drawn over a real select.
       if (!native && skinOf(el)) continue;
       // The skin's own search box; a radio or tick box is never part of one.
       if (native && el.tagName === 'INPUT' && !/^(radio|checkbox)$/i.test(el.type) && skinOf(el)) continue;
       const skinned = isSkinnedSelect(el);
-      if (!skinned && !isVisible(el)) continue;
+      if (!skinned && !editor && !isVisible(el)) continue;
 
       // A plain text box that draws its own list of suggestions (Lever's
       // location: a sibling "dropdown-results" div) is chosen from too.
@@ -1271,6 +1346,10 @@
         /pick (a )?date|mm\/dd|dd\/mm|yyyy/i.test(placeholder) || !!deepClosest(el, '[class*="datepicker" i], [class*="date-picker" i]');
       // A read-only box that opens a picker is still answered, through the picker.
       if (el.readOnly && !(combobox || datePicker || el.getAttribute('aria-haspopup'))) continue;
+      if (native && !editor && !combobox && !datePicker && !el.getAttribute('aria-haspopup') && isHoneypot(el)) {
+        skippedTraps++;
+        continue;
+      }
 
       const name = el.getAttribute('name') || '';
       const idAttr = el.id || '';
@@ -1470,6 +1549,7 @@
       probed,
       platformMarkers,
       skippedSensitive,
+      skippedTraps,
       uploads: findUploads(),
       unread: unreadQuestions(readEls, claimed, fields),
       addButtons: addEntryButtons(),
@@ -1873,8 +1953,8 @@
            // Workday: " Select One Required" on the button, and an
            // <abbr class="requiredAsterisk"> in the legend, not around it.
            /\brequired\s*$/i.test(el.getAttribute('aria-label') || '') || legendRequired(el) ||
-           // CalCareers: "Institution Name: **".
-           (!/^(radio|checkbox)$/.test(el.type) && /\*\s*$/.test(labelFor(el)));
+           // CalCareers: "Institution Name: **"; Teamtailor: "What are your salary expectations?*Required".
+           (!/^(radio|checkbox)$/.test(el.type) && /(\*|\*\s*required)\s*$/i.test(labelFor(el)));
   }
 
   function legendRequired(el) {
@@ -1891,13 +1971,15 @@
       if (!label || label.contains(el)) continue;
       // A radio's own option label is not the question's.
       if (/^(radio|checkbox)$/.test(el.type) && el.id && label.htmlFor === el.id) continue;
-      return /required/i.test(String(label.className || '')) || /\*\s*$/.test(label.textContent || '');
+      return /required/i.test(String(label.className || '')) || /\*\s*(required\s*)?$/i.test(label.textContent || '');
     }
     return false;
   }
 
   function readValue(el, type) {
     if (type === 'checkbox') return el.checked ? 'checked' : '';
+    const editor = framedEditor(el);
+    if (editor) return (editor.textContent || '').trim().slice(0, 4000);
     if (el.isContentEditable) return (el.textContent || '').trim().slice(0, 4000);
     return (el.value || '').slice(0, 4000);
   }

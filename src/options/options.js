@@ -167,6 +167,12 @@ function profileInput(field, value, profile) {
     // The help shows as a hint under the box, so it is not repeated inside it.
     return `<textarea ${common}>${esc(value)}</textarea>`;
   }
+  // A switch that is "not set" until touched: then yes or no.
+  if (field.toggle) {
+    const set = value === 'yes' || value === 'no';
+    return `<span class="toggle"><input type="checkbox" class="switch" ${common} data-toggle="${set ? 'set' : ''}"${value === 'yes' ? ' checked' : ''}>
+      <span class="hint toggle-state">${set ? (value === 'yes' ? 'Yes' : 'No') : 'Not set: phil leaves this question to you'}</span></span>`;
+  }
   if (field.type === 'boolean') {
     return `<select ${common}>
       <option value=""${value === '' ? ' selected' : ''}>Not answered</option>
@@ -360,7 +366,9 @@ function renderProfile(saved) {
 function collectProfile() {
   const profile = {};
   for (const el of $('profile-sections').querySelectorAll('[data-key]')) {
-    profile[el.dataset.key] = el.value.trim();
+    profile[el.dataset.key] = el.dataset.toggle !== undefined
+      ? (el.dataset.toggle ? (el.checked ? 'yes' : 'no') : '')
+      : el.value.trim();
   }
   for (const list of Object.keys(LISTS)) {
     profile[list] = collectList(list)
@@ -377,6 +385,14 @@ function collectProfile() {
  * types, so a full name appears as soon as a first and last name exist, and the
  * non-compete industry question appears the moment the answer above is yes.
  */
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset?.toggle === undefined) return;
+  el.dataset.toggle = 'set';
+  const state = el.parentElement.querySelector('.toggle-state');
+  if (state) state.textContent = el.checked ? 'Yes' : 'No';
+});
+
 function refreshDerived() {
   const profile = collectProfile();
   for (const el of $('profile-sections').querySelectorAll('[data-key]')) {

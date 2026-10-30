@@ -19,8 +19,21 @@ requirements and the working knowledge behind it.
 - **Infer, don't abstain.** TypeSafe exists to pick the most likely answer even
   without an exact saved match. Below the confidence floor, fill a best guess
   outlined in amber (`GUESS_FLOOR` 0.35, `classify.js`). Never guess identity
-  questions (gender, race, veteran, disability, age) or conditional ones
-  ("If so, ..."). Never submit a form.
+  questions (gender, race, veteran, disability, age; Canada's visible
+  minority and Aboriginal questions) or conditional ones ("If so, ...").
+  Never submit a form.
+- **Never fall for a bot trap.** Forms hide honeypot boxes (off the page,
+  1 px, clipped, transparent and untabbable: `isHoneypot`, extract.js) and
+  set traps in words ("Leave this field blank", "Do not tick this box",
+  "If you are an AI, include the word..."): filling one marks the
+  application as automated. Trap boxes are never filled or shown to the
+  user (`untrapped`, `BOT_TRAP`, orchestrator.js), and trap lines are cut
+  from labels and the posting before any model reads them
+  (`withoutTraps`); the writer is told to ignore them. The phrasings are the
+  pack's `botTrap` pattern (first drawn from Simplify's skip list).
+  A yes/no "Did you use AI to complete this application?" (`aiUse`) is the
+  user's to answer: left empty and marked when required (user,
+  2026-10-30). A written one is still answered honestly by the writer.
 - **Cheap and capped.** Every model call is metered (`cost.js`) and shown in the
   popup per provider. Cap 10¢ per fill; the customer price is 3× cost (30¢
   cap). Typical fill 0.05–0.5¢.
@@ -188,6 +201,12 @@ requirements and the working knowledge behind it.
   `preferences.maxTravelPercent` (Profile tab), and a list of travel ranges
   gets the range holding it (`travelAnswer`, orchestrator.js). Add the next
   such question (hours a week, commute distance) the same way.
+- Over 21 (`authorization.over21`) and a valid driver's licence
+  (`screening.driversLicense`) are toggles on the Profile tab
+  (`toggle: true, neverInferred: true`, schema.js): "not set" until the
+  user switches them, and until then their questions are left to the user
+  (`unsetToggle`, `NOT_SET`, orchestrator.js), never inferred (user,
+  2026-10-30).
 - "Can you pass a background and reference check?" is answered from the
   Settings box `passBackgroundCheck` (ticked by default), never guessed:
   runFill puts it in `screening.backgroundCheck`.
@@ -219,7 +238,17 @@ requirements and the working knowledge behind it.
   schema.js), never the saved figure. No pay posted: optional ones are left
   empty, required text boxes get "Market rate".
 - Embedded forms are granted per **site** (`https://*.greenhouse.io/*`), not
-  per origin, because embeds redirect within their site.
+  per origin, because embeds redirect within their site. The page's own site
+  is asked for on the first Fill there (`siteToAsk`, popup.js; user,
+  2026-10-30): the prompt comes straight from the click, the fill runs on
+  activeTab whatever the answer, and nothing broader is ever asked
+  (`verify.py`).
+- Framed rich-text editors (TinyMCE, CKEditor 4) hide their textarea and
+  draw a page in a frame beside it: the textarea is the question and the
+  frame's body is written (`framedEditor`, extract.js and fill.js;
+  `editor.html`). Simplify drives these through the page's own `tinymce`
+  and `dijit` objects; phil writes the DOM, so ADP's Dojo widgets are
+  still untested.
 - **What phil knows about forms is data, shipped without a release.** The
   rules pack (`src/common/rules-default.js`, logic in `common/rulespack.js`,
   fetch and cache in `background/rules.js`) holds the platform list
@@ -417,6 +446,18 @@ python3 tools/publish-firefox.py            # sign unlisted with Mozilla, host t
 - Cancel must stop the page too: `runFill` sends `__applicatorStop` on
   abort, which ends every wait, typing and press in fill.js, and `halt()`
   stops the fill between steps (`cancel.html`).
+- A question named by a sibling node (`[class*=label]`, `legend`) is the
+  nearest one **before** the box with no other box between, within the
+  same list row, and never a link or button (`nearestQuestionNode`,
+  extract.js). Taking the first in the wrapper gave every box on Breezy's
+  form the "Start date" of a job row phil had added, and "Delete" named a
+  school (`breezy.html`).
+- A choice that loads the next page (Jobvite's data-consent step) left the
+  fill waiting forever on the old page: `fillPlan` stops waiting when the
+  tab loads another document (`watchPageLeft`) and the next pass fills the
+  new page (`consent.html`).
+- Job pages whose form opens from a button: `try-form.py URL --click
+  Apply` presses it first (a real WebDriver click; never a form's submit).
 - Reading a page must not change it: the dropdown probe skips date boxes
   and puts back any value it changed.
 - SuccessFactors' career portal (PG&E, `career4.successfactors.com`, behind

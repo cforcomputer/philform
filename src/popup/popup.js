@@ -604,9 +604,26 @@ function setRunning(running) {
   show($('cancel'), running);
 }
 
+/**
+ * The page's own site, when phil may not yet keep working on it. Opening the
+ * popup lends phil the page only until it navigates (activeTab); the first
+ * Fill on a site asks for that site for good, so later pages and steps of an
+ * application need nothing more. Never anything broader than the one site.
+ */
+let siteToAsk = null;
+
+async function checkSiteAccess(url) {
+  siteToAsk = null;
+  if (!/^https?:/i.test(url || '')) return;
+  const pattern = sitePattern(new URL(url).origin);
+  const granted = await chrome.permissions.contains({ origins: [pattern] }).catch(() => true);
+  if (!granted) siteToAsk = pattern;
+}
+
 async function init() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTab = tab;
+  await checkSiteAccess(tab?.url);
 
   let status;
   try {
@@ -774,6 +791,14 @@ $('frames-reload').addEventListener('click', async () => {
 });
 
 $('fill').addEventListener('click', async () => {
+  // Asked before anything is awaited: browsers show the prompt only straight
+  // from a click. The fill does not wait for the answer: it runs on the page
+  // the popup was opened on either way, and Firefox may close the popup for
+  // the prompt (the run carries on, and reopening shows it).
+  if (siteToAsk) {
+    chrome.permissions.request({ origins: [siteToAsk] }).catch(() => false);
+    siteToAsk = null;
+  }
   show($('error'), false);
   show($('result'), false);
   setRunning(true);

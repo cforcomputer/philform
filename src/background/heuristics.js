@@ -46,7 +46,7 @@ const RULES = [
   // --- contact ------------------------------------------------------------
   // Consent to texts before anything mentioning "communication" or "agree".
   // Ramp asks for SMS and WhatsApp consent separately (smsConsent, whatsAppConsent).
-  { key: 'contact.textConsent', attr: /(text|sms|whats[-_ ]?app)[-_ ]?(consent|opt[-_ ]?in)|consent[-_ ]?approval/i, label: /text messages?|\bsms\b|whats ?app|communication policy/i },
+  { key: 'contact.textConsent', attr: /(text|sms|whats[-_ ]?app)[-_ ]?(consent|opt[-_ ]?in)|consent[-_ ]?approval/i, label: /text (messages?|communications?)|\b(receiv|get)\w* texts?\b|\bsms\b|whats ?app|communication policy/i },
   { key: 'contact.preferredMethod', attr: /(preferred|best)[-_ ]?(contact|communication)|contact[-_ ]?(method|preference)/i, label: /preferred (method of |way of )?(communication|contact)|(contact|communication) (method|preference)|how (would|should|do) (you like|we) (to )?(be )?contact/i },
   { key: 'contact.phoneType', attr: /(phone|number|contact[-_ ]?number)[-_ ]?type/i, label: /^(phone|number) type$|type of (phone|number)/i },
   { key: 'contact.email', attr: /e[-_ ]?mail/i, label: /e[-\s]?mail/i },
@@ -124,6 +124,8 @@ const RULES = [
   { key: 'authorization.authorizedToWork', attr: /(work[-_ ]?auth|authoriz|legally[-_ ]?(work|entitled)|right[-_ ]?to[-_ ]?work|eligible[-_ ]?to[-_ ]?work)/i, label: /legally\s*(authori[sz]ed|entitled|able)\s*to\s*work|right\s*to\s*work|eligible\s*to\s*work|authori[sz]ed\s*to\s*work/i },
   { key: 'authorization.citizenship', attr: /citizenship/i, label: /citizenship|are you a (u\.?s\.?|united states) citizen/i },
   { key: 'authorization.visaStatus', attr: /(visa|immigration|work[-_ ]?permit)/i, label: /visa\s*(status|type)|immigration\s*status|work\s*permit/i },
+  { key: 'authorization.over21', attr: /(over[-_ ]?21|age[-_ ]?21|at[-_ ]?least[-_ ]?21)/i, label: /(at least|over|older than)\s*21\b|\b21 years( of age)? or older|\b21 or older|\bage (of )?21\b/i },
+  { key: 'screening.driversLicense', attr: /drivers?[-_ ]?licen[cs]e(?![-_ ]?(no|num|number|state|class|exp))/i, label: /\b(valid|current|have an?|hold an?|possess an?)\b[^?]{0,30}\bdriver'?s'? licen[cs]e\b(?![^?]*\b(number|no\.|state|class|expir))/i },
   { key: 'authorization.over18', attr: /(over[-_ ]?18|age[-_ ]?18|at[-_ ]?least[-_ ]?18|minimum[-_ ]?age)/i, label: /(at least|over|older than)\s*18|18 years( of age)? or older/i },
 
   // --- compensation -------------------------------------------------------

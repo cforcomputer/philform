@@ -285,6 +285,29 @@ input[type="range"]::-moz-range-progress { height: 10px; border-radius: 999px; b
 .faq details p { color: var(--muted); padding-bottom: 20px; font-size: 16px; }
 .faq a { color: var(--accent-text); font-weight: 600; }
 
+/* open source */
+.open { display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; align-items: center; }
+.open-copy h2 { margin-bottom: 14px; }
+.open-points { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 20px; }
+.open-points li { display: flex; gap: 16px; align-items: flex-start; }
+.open-points .icon { flex: none; }
+.open-points h3 { font-size: 19px; margin: 2px 0 4px; }
+.open-points p { margin: 0; color: var(--muted); font-size: 16px; }
+.repo { display: grid; gap: 16px; padding: 28px; border-radius: 24px; background: var(--card); border: 1px solid var(--line);
+  box-shadow: var(--shadow-big); color: var(--fg); text-decoration: none; transform: rotate(1deg); transition: transform .2s; }
+.repo:hover { transform: rotate(0) translateY(-2px); }
+.repo .gh { width: 28px; height: 28px; fill: currentColor; flex: none; }
+.repo-top { display: flex; align-items: center; gap: 12px; font: 600 19px/1.3 var(--round); }
+.repo-desc { color: var(--muted); font-size: 16px; }
+.repo-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.repo-tags span { padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--accent-text);
+  background: rgba(6, 199, 85, .1); border: 1px solid rgba(6, 199, 85, .25); }
+.repo-btn { justify-self: start; color: #fff; background: #1f2329; box-shadow: 0 4px 0 #000; }
+.repo-btn .gh { width: 20px; height: 20px; }
+@media (prefers-color-scheme: dark) { .repo-btn { color: #1f2329; background: #eef0f3; box-shadow: 0 4px 0 #8a9099; } }
+@media (max-width: 860px) { .open { grid-template-columns: 1fr; gap: 32px; } .repo { transform: none; } .repo-btn { justify-self: stretch; } }
+@media (prefers-reduced-motion: reduce) { .repo, .repo:hover { transform: none; transition: none; } }
+
 /* final */
 .final { padding-bottom: 96px; }
 .final-card { position: relative; text-align: center; padding: 64px 24px 56px; border-radius: 32px; overflow: hidden;
@@ -294,25 +317,40 @@ input[type="range"]::-moz-range-progress { height: 10px; border-radius: 999px; b
 .final h2 { color: #fff; }
 .final p { color: rgba(255, 255, 255, .88); margin-top: 12px; }
 .final .phil-stalk { stroke: #25282f; }
-.waitlist, .install { max-width: 560px; margin: 0 auto; }
-.waitlist-row { display: flex; gap: 10px; margin-top: 24px; }
-.waitlist input[type="email"] { flex: 1; min-width: 0; height: 54px; padding: 0 18px; border-radius: 14px; border: 0; font: 500 17px var(--body);
-  color: #1f2329; background: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, .12); }
+.final .final-sub { font-size: 18px; margin-top: 10px; }
+.install { max-width: 560px; margin: 0 auto; }
+.install-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+.install .btn { color: #1f2329; background: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, .18); }
+
+/* one panel per browser: Firefox to download, Chrome to join the beta */
+.browsers { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 860px; margin: 32px auto 0; text-align: left; }
+.browser { display: flex; flex-direction: column; gap: 14px; padding: 26px; border-radius: 22px; background: var(--card); color: var(--fg);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .12); }
+.browser.first { order: -1; }
+.browser-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.browser h3 { font-size: 24px; font-weight: 800; }
+.status { flex: none; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); background: var(--bg-soft); border: 1px solid var(--line); }
+.status-live { color: var(--accent-text); background: rgba(6, 199, 85, .1); border-color: rgba(6, 199, 85, .3); }
+.final .browser p { color: var(--muted); margin: 0; }
+.final .browser-text { font-size: 15px; flex: 1; }
+.final .browser-fine { font-size: 13px; }
+.browser .btn { width: 100%; }
+.waitlist-row { display: flex; gap: 10px; }
+.waitlist input[type="email"] { flex: 1; min-width: 0; height: 54px; padding: 0 16px; border-radius: 14px; border: 2px solid var(--line); font: 500 16px var(--body);
+  color: var(--fg); background: var(--bg); }
 .waitlist input[type="email"]::placeholder { color: #8a9099; }
-.waitlist .btn { height: 54px; color: #3d2b00; background: var(--sun); box-shadow: 0 4px 0 var(--sun-edge); }
+.waitlist .btn { width: auto; flex: none; height: 54px; color: #3d2b00; background: var(--sun); box-shadow: 0 4px 0 var(--sun-edge); }
 .waitlist .btn:active { box-shadow: 0 0 0 var(--sun-edge); }
 .waitlist .btn:disabled { opacity: .7; cursor: default; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; }
-.form-note { font-size: 14px; }
-.form-note.ok { font-weight: 700; color: #fff !important; }
-.form-note.err { font-weight: 700; color: #fff3c4 !important; }
-.preview { margin-bottom: 36px; }
-.final .preview-note { font-size: 14px; margin-top: 10px; }
-.final .preview-note a { color: #fff; text-decoration: underline; }
-.final .waitlist { padding-top: 28px; border-top: 1px solid rgba(255, 255, 255, .25); }
-.install-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
-.install .btn { color: #1f2329; background: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, .18); }
-@media (max-width: 560px) { .waitlist-row { flex-direction: column; } .waitlist .btn { width: 100%; } }
+.final .form-note { font-size: 13px; margin-top: 10px; }
+.final .form-note.ok { font-weight: 700; color: var(--accent-text); }
+.final .form-note.err { font-weight: 700; color: #b45309; }
+.final .final-links { margin-top: 28px; font-size: 15px; }
+.final-links a { color: #fff; font-weight: 600; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.final-links span { margin: 0 8px; opacity: .6; }
+@media (max-width: 760px) { .browsers { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .waitlist-row { flex-direction: column; } .waitlist input[type="email"] { flex: none; } .waitlist .btn { width: 100%; } .browser { padding: 20px; } }
 
 /* footer */
 .foot { max-width: 1160px; margin: 0 auto; padding: 40px 16px 48px; border-top: 1px solid var(--line); display: grid; gap: 12px; justify-items: center; text-align: center; color: var(--muted); font-size: 15px; }

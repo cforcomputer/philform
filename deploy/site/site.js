@@ -4,7 +4,7 @@ import { drawPhils } from '/phil.js';
 
 /**
  * On launch day, put the store links here: the buttons become "Add to
- * Chrome" / "Add to Firefox" and the early-access form goes away.
+ * Chrome" / "Add to Firefox" and the two browser panels (download, beta) go away.
  */
 const STORES = {
   chrome: '',   // e.g. https://chromewebstore.google.com/detail/philform/<id>
@@ -21,8 +21,10 @@ drawPhils();
 const isFirefox = /firefox/i.test(navigator.userAgent);
 const browser = isFirefox ? 'firefox' : 'chrome';
 const storeUrl = STORES[browser] || STORES.chrome || STORES.firefox;
+// The visitor's own browser comes first.
+$(`browser-${browser}`).classList.add('first');
 if (storeUrl) {
-  $('waitlist').hidden = true;
+  $('preview').hidden = true;
   $('install').hidden = false;
   for (const [name, url] of Object.entries(STORES)) {
     const btn = $(`get-${name}`);

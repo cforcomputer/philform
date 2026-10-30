@@ -225,6 +225,7 @@ export function mergeExtractions(results) {
   const fields = [];
   const uploads = [];
   let skippedSensitive = 0;
+  let skippedTraps = 0;
   const texts = [];
 
   for (const { frameId, result } of ok) {
@@ -239,6 +240,7 @@ export function mergeExtractions(results) {
     }
     for (const u of result.uploads || []) uploads.push({ ...u, frameId });
     skippedSensitive += result.skippedSensitive || 0;
+    skippedTraps += result.skippedTraps || 0;
     if (result.pageText) texts.push(result.pageText);
   }
 
@@ -255,6 +257,7 @@ export function mergeExtractions(results) {
     fields,
     uploads,
     skippedSensitive,
+    skippedTraps,
     pageText: texts.join('\n').slice(0, 60000),
     context: { ...context, multiStep: ok.some(r => r.result.context?.multiStep) },
     // Questions on the form no field was read for, from every frame.
