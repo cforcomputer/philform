@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>philform: job applications, filled in seconds</title>
+<meta name="description" content="phil fills job applications from your profile: contact details, work history and the written questions, in your own voice. You check every answer and press submit. 10 applications free.">
+<meta property="og:title" content="philform: job applications, filled in seconds">
+<meta property="og:description" content="Apply in minutes, not hours. phil fills the form; you check it and press submit.">
+<meta property="og:image" content="/icon128.png">
+<meta name="theme-color" content="#06c755">
+<link rel="icon" href="/icon32.png">
+<link rel="preload" href="/fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="philform home">
+    <span class="brand-phil" data-phil="calm"></span>
+    <span class="wordmark">phil<span>form</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#features">Why phil</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="btn btn-small cta-link" href="#start">Get philform</a>
+</header>
+
+<main id="top">
+
+  <!-- Hero ----------------------------------------------------------------- -->
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-copy reveal">
+      <p class="eyebrow"><span class="dot"></span> AI autofill for job applications</p>
+      <h1>Apply in minutes,<br><em>not hours.</em></h1>
+      <p class="lede">phil fills job applications from a profile you set up once: your details, your work history,
+        even the "Why do you want to work here?" questions, written in your voice. You check it and press submit.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-big cta-link" href="#start">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11.5 2 4 11.5h5.5L8.5 18 16 8.5h-5.5z"/></svg>
+          <span class="cta-label">Get philform free</span>
+        </a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="fine">10 applications free. No card needed. Firefox now, Chrome in closed beta.</p>
+    </div>
+
+    <!-- A form filling itself: the demo -->
+    <div class="demo reveal" aria-label="philform filling an application, as an animation">
+      <div class="window">
+        <div class="window-bar">
+          <span class="lights"><i></i><i></i><i></i></span>
+          <span class="url">careers.acme.example/apply/product-designer</span>
+        </div>
+        <div class="window-body">
+          <div class="job">
+            <p class="job-title">Product Designer</p>
+            <p class="job-meta">Acme · Portland, OR · Full time</p>
+          </div>
+          <div class="form">
+            <div class="row2">
+              <label class="field"><span>First name</span><b data-fill="phil"></b></label>
+              <label class="field"><span>Last name</span><b data-fill="Doe"></b></label>
+            </div>
+            <label class="field"><span>Email</span><b data-fill="phil.doe@example.com"></b></label>
+            <div class="row2">
+              <label class="field"><span>Phone</span><b data-fill="415-555-0134"></b></label>
+              <label class="field"><span>Location</span><b data-fill="Portland, OR"></b></label>
+            </div>
+            <label class="field"><span>LinkedIn</span><b data-fill="linkedin.com/in/phildoe"></b></label>
+            <label class="field field-long"><span>Why do you want to work at Acme?</span>
+              <b data-fill="At Globex I redesigned the onboarding flow and cut drop-off by a third. Acme's checkout has the same problem at a bigger scale, and I'd like to work on it with the team that built it."></b></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="popup" id="demo-popup">
+        <div class="popup-head">
+          <span class="popup-phil" data-phil="calm"></span>
+          <span class="wordmark small">phil<span>form</span></span>
+        </div>
+        <div class="popup-state" id="demo-state">
+          <button class="popup-fill" type="button" tabindex="-1" aria-hidden="true">
+            <svg viewBox="0 0 20 20"><path d="M11.5 2 4 11.5h5.5L8.5 18 16 8.5h-5.5z"/></svg>phil this application
+          </button>
+          <div class="popup-progress"><span class="runner" data-phil="running"></span><div class="track"><i id="demo-bar"></i></div></div>
+          <div class="popup-reward">
+            <span class="reward-phil" data-phil="happy"></span>
+            <div><small>phil just saved you</small><strong id="demo-saved">9 min</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Where it works --------------------------------------------------------- -->
+  <section class="strip reveal" aria-label="Where philform works">
+    <p>Works on the application forms you meet every day</p>
+    <ul>
+      <li>Greenhouse</li><li>Lever</li><li>Ashby</li><li>Workday</li><li>iCIMS</li><li>SmartRecruiters</li>
+      <li class="plus">and forms it has never seen</li>
+    </ul>
+  </section>
+
+  <!-- How it works ----------------------------------------------------------- -->
+  <section class="section" id="how">
+    <div class="section-head reveal">
+      <p class="kicker">How it works</p>
+      <h2>Set up once. Then three clicks an application.</h2>
+    </div>
+    <ol class="steps">
+      <li class="step reveal">
+        <span class="step-n">1</span>
+        <div class="step-art art-cv" aria-hidden="true">
+          <div class="doc"><i></i><i></i><i class="short"></i><i></i><i class="short"></i></div>
+          <div class="arrow"></div>
+          <div class="chips"><span>Name</span><span>Jobs</span><span>Schools</span><span>Skills</span></div>
+        </div>
+        <h3>Add your CV</h3>
+        <p>Upload it and phil reads it into your profile. Add anything it missed, like links or the answers you are proud of.</p>
+      </li>
+      <li class="step reveal">
+        <span class="step-n">2</span>
+        <div class="step-art art-click" aria-hidden="true">
+          <div class="mini-btn"><svg viewBox="0 0 20 20"><path d="M11.5 2 4 11.5h5.5L8.5 18 16 8.5h-5.5z"/></svg>phil this application</div>
+          <div class="cursor"></div>
+        </div>
+        <h3>Click "phil this application"</h3>
+        <p>On any job application, click phil and then Fill. Short fields go in at once while the written answers are drafted.</p>
+      </li>
+      <li class="step reveal">
+        <span class="step-n">3</span>
+        <div class="step-art art-check" aria-hidden="true">
+          <div class="lines"><i class="ok"></i><i class="ok"></i><i class="guess"></i><i class="ok"></i></div>
+          <div class="submit">Submit</div>
+        </div>
+        <h3>Check and submit</h3>
+        <p>Everything phil touched is outlined so it is quick to review. Its best guesses are marked in amber. You press submit, never phil.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Features ------------------------------------------------------------- -->
+  <section class="section" id="features">
+    <div class="section-head reveal">
+      <p class="kicker">Why phil</p>
+      <h2>Built for the forms that waste your evenings.</h2>
+    </div>
+    <div class="bento">
+      <article class="card card-wide card-green reveal">
+        <div class="card-copy">
+          <h3>It adapts to forms it has never seen</h3>
+          <p>phil reads what each box is asking, not where it sits on the page. Odd dropdowns, unlabelled boxes and
+            redesigned careers pages still get filled. And each site you apply on gets easier the next time.</p>
+        </div>
+        <div class="map" aria-hidden="true">
+          <div class="map-q">"Preferred first name"</div><div class="map-to"></div><div class="map-a">phil</div>
+          <div class="map-q">"Where are you based?"</div><div class="map-to"></div><div class="map-a">Portland, OR</div>
+          <div class="map-q">"Notice period"</div><div class="map-to"></div><div class="map-a">2 weeks</div>
+        </div>
+      </article>
+      <article class="card reveal">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16M6 15l9-9 3 3-9 9H6z"/></svg></span>
+        <h3>Answers that sound like you</h3>
+        <p>Written answers use your real projects and numbers, one story per question. phil checks each sentence for
+          the phrases that make writing sound machine-made and takes them out.</p>
+      </article>
+      <article class="card reveal">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></span>
+        <h3>It never guesses who you are</h3>
+        <p>Gender, race, veteran and disability questions are left alone unless you turn them on and answer them
+          yourself. phil never makes them up.</p>
+      </article>
+      <article class="card reveal">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <h3>Your profile stays with you</h3>
+        <p>It is kept in your browser, not on our servers. Passwords, card numbers and ID numbers are never read or
+          filled. No ads, no tracking, nothing sold.</p>
+      </article>
+      <article class="card reveal">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span>
+        <h3>Fast</h3>
+        <p>Under ten seconds a page, and close to instant on a page phil already knows.</p>
+      </article>
+      <article class="card reveal">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"/></svg></span>
+        <h3>Your best answers, reused</h3>
+        <p>Typed a great answer yourself? Click "Save my answers" and phil uses it the next time a form asks
+          the same thing, however it is worded.</p>
+      </article>
+      <article class="card reveal">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3c.4 3-1.3 4.8-3 6.7C7.4 11.4 6 13 6 15.5a6 6 0 0 0 12 0c0-2-.8-3.7-1.8-5-.3 1.3-1 2.3-2 2.8.8-4-.3-8.4-1.2-10.3z"/></svg></span>
+        <h3>Progress you can see</h3>
+        <p>After every fill phil shows the time it saved you and what that time is worth. A daily goal and a
+          streak keep your search moving on the days it feels slow.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- What it saves -------------------------------------------------------- -->
+  <section class="section calc-section" id="savings">
+    <div class="calc reveal">
+      <div class="calc-copy">
+        <p class="kicker">What it saves you</p>
+        <h2>Your time is worth more than a cent.</h2>
+        <p>Move the sliders to match your search. After every fill, phil shows you what it saved and what it cost.</p>
+      </div>
+      <div class="calc-box">
+        <label class="slider"><span>Applications a week <b id="c-apps">10</b></span>
+          <input type="range" id="apps" min="1" max="40" value="10"></label>
+        <label class="slider"><span>Minutes you'd spend typing each <b id="c-min">12</b></span>
+          <input type="range" id="mins" min="3" max="40" value="12"></label>
+        <label class="slider"><span>An hour of your time is worth <b id="c-wage">$20</b></span>
+          <input type="range" id="wage" min="8" max="150" step="1" value="20"></label>
+        <div class="calc-out">
+          <div><small>Time back each month</small><strong id="c-hours">8.6 hours</strong></div>
+          <div><small>Worth</small><strong id="c-worth" class="green">$172</strong></div>
+          <div><small>phil costs about</small><strong id="c-cost">$0.54</strong></div>
+        </div>
+        <p class="fine">An estimate: a typical fill costs about a cent. Your first 10 applications are free.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -------------------------------------------------------------- -->
+  <section class="section" id="pricing">
+    <div class="section-head reveal">
+      <p class="kicker">Pricing</p>
+      <h2>Pay for what you use. Like a transport card.</h2>
+    </div>
+    <div class="prices">
+      <article class="price reveal">
+        <p class="price-name">Start</p>
+        <p class="price-big">Free</p>
+        <p class="price-sub">your first 10 applications</p>
+        <ul>
+          <li>Every page of each application</li>
+          <li>Written answers included</li>
+          <li>No card, no sign-up form</li>
+        </ul>
+        <a class="btn btn-ghost cta-link" href="#start">Get started</a>
+      </article>
+      <article class="price price-main reveal">
+        <span class="badge">No subscription</span>
+        <p class="price-name">Pay as you go</p>
+        <p class="price-big">$5 <small>top-up</small></p>
+        <p class="price-sub">about 400 applications</p>
+        <ul>
+          <li>About a cent per application</li>
+          <li>Never more than 30¢ for any fill</li>
+          <li>You see the cost of every fill</li>
+          <li>Top up only when you run out</li>
+        </ul>
+        <a class="btn cta-link" href="#start">Get philform</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- Trust ---------------------------------------------------------------- -->
+  <section class="section trust reveal">
+    <div class="trust-grid">
+      <div><strong>You submit.</strong><span>phil never presses submit. Every application goes out only when you send it.</span></div>
+      <div><strong>Your data, your browser.</strong><span>Your profile is stored on your computer. Only what a form asks for is sent to fill it.</span></div>
+      <div><strong>No tracking.</strong><span>No ads, no analytics, nothing sold. <a href="/privacy">Read the privacy policy</a>.</span></div>
+    </div>
+  </section>
+
+  <!-- FAQ ------------------------------------------------------------------ -->
+  <section class="section" id="faq">
+    <div class="section-head reveal">
+      <p class="kicker">Questions</p>
+      <h2>Good to know.</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>Does phil submit applications for me?</summary>
+        <p>No, never. phil fills the form and shows you what it did. You read it over and press submit yourself.</p>
+      </details>
+      <details>
+        <summary>Which job sites does it work on?</summary>
+        <p>Any application form in your browser: company careers pages and the systems behind them, such as Greenhouse,
+          Lever, Ashby, Workday and iCIMS. It reads each form fresh, so new and unusual forms work too.</p>
+      </details>
+      <details>
+        <summary>Will the written answers sound like a robot?</summary>
+        <p>They are written from your own CV and projects, one real example per question, and checked for the stock
+          phrases that give machine writing away. Read them before you submit and change anything you like. Answers you
+          save are reused word for word.</p>
+      </details>
+      <details>
+        <summary>What if phil gets something wrong?</summary>
+        <p>Everything it filled is outlined, and anything it was unsure of is outlined in amber, so you know where to
+          look. Fix it on the page, click "Save my answers", and phil fills it your way next time.</p>
+      </details>
+      <details>
+        <summary>What happens to my information?</summary>
+        <p>Your profile stays in your browser. When you fill a form, the questions and the parts of your profile needed
+          to answer them are sent to the AI that fills it. philform's service passes them on without keeping them, and we never sell data.
+          The <a href="/privacy">privacy policy</a> has the details.</p>
+      </details>
+      <details>
+        <summary>How does paying work?</summary>
+        <p>Your first 10 applications are free. After that you add $5 to a wallet, and each fill takes what it used,
+          about a cent. There is no subscription and nothing renews. Questions about a payment or a refund go to
+          <a href="/support">support</a>.</p>
+      </details>
+      <details>
+        <summary>Which browsers?</summary>
+        <p>Firefox on a computer: download it <a href="#start">below</a>. Chrome is in closed beta, and other
+          Chromium browsers, such as Edge and Brave, can install it from the Chrome Web Store once it opens.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- Final call: early access, or the store buttons on launch ---------------- -->
+  <section class="section final" id="start">
+    <div class="final-card reveal">
+      <span class="final-phil" data-phil="happy"></span>
+      <h2>Let phil fill the next one.</h2>
+
+      <div id="install" class="install" hidden>
+        <p>Free for your first 10 applications.</p>
+        <div class="install-btns">
+          <a class="btn btn-big" id="get-chrome" href="#">Add to Chrome</a>
+          <a class="btn btn-big btn-light" id="get-firefox" href="#">Add to Firefox</a>
+        </div>
+      </div>
+
+      <div id="preview" class="install preview">
+        <p>philform is still in development, so expect a few rough edges. Free for your first 10 applications.</p>
+        <div class="install-btns">
+          <a class="btn btn-big" id="get-firefox-preview" href="/firefox/philform-1.0.7.xpi">Download for Firefox</a>
+        </div>
+        <p class="fine preview-note">Version <span id="firefox-version">1.0.7</span>. Firefox asks once to allow the install from
+          philformapp.com: press <b>Continue</b>, then <b>Add</b>.</p>
+        <p class="fine preview-note">Something not right, or an idea? Tell us at
+          <a href="mailto:support@philformapp.com?subject=philform%20feedback">support@philformapp.com</a>,
+          or press the thumbs down in phil after a fill.</p>
+      </div>
+
+      <form id="waitlist" class="waitlist" novalidate>
+        <p><b>Chrome is in closed beta.</b> Leave your email and we'll send you an invite.</p>
+        <div class="waitlist-row">
+          <label class="sr" for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn" type="submit">Join the Chrome beta</button>
+        </div>
+        <p class="form-note" id="waitlist-note" role="status">One email when your invite is ready. Nothing else.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-brand">
+    <span class="brand-phil" data-phil="calm"></span>
+    <span class="wordmark">phil<span>form</span></span>
+  </div>
+  <p>Fills job applications so you can spend your time on the ones that matter.</p>
+  <nav aria-label="Footer">
+    <a href="/support">Support</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="#faq">FAQ</a>
+    <a href="#pricing">Pricing</a>
+  </nav>
+  <p class="fine">© 2026 philform. No cookies, no tracking on this site.</p>
+</footer>
+
+<script type="module" src="/site.js"></script>
+</body>
+</html>

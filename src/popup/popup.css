@@ -1,0 +1,501 @@
+/*
+ * One spacing scale (4, 8, 12, 16), one radius per kind of thing, and three
+ * kinds of button: the one primary action, outlined secondary actions, and
+ * quiet ghost buttons for small extras. Links are not used for actions.
+ */
+:root {
+  color-scheme: light dark;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
+  --r-card: 14px; --r-btn: 12px;
+  /* Rounded letters for the brand and the big moments; Hiragino Maru Gothic on a Mac. */
+  --round: ui-rounded, "Hiragino Maru Gothic ProN", "SF Pro Rounded", "Nunito", system-ui, sans-serif;
+
+  /* After LINE: one green on white and soft grey, sumi charcoal text, and
+     gold kept for rewards. Pink lives only in Phil's cheeks and ears.
+     --accent (#04873b) carries white text at 4.6:1; the bright --win green
+     is for fills, bars and Phil's check, never behind text. */
+  --bg: #ffffff;
+  --fg: #1f2329;
+  --muted: #5d6570;
+  --line: #e7eaee;
+  --card: #f6f7f9;
+  --hover: rgba(31, 35, 41, .06);
+  --ring: #06c755;
+  --ink: #25282f;
+  --accent: #04873b;
+  --accent-edge: #036a2e;
+  --accent-text: #04873b;
+  --accent-fg: #ffffff;
+  --warn-bg: #fff6df;
+  --warn-fg: #7a4d00;
+  --error-bg: #fdeeee;
+  --error-fg: #9b1c1c;
+  --ok: #04873b;
+  --win: #06c755; --win-dark: #04a246; --sun: #ffc800; --sun-text: #9a6700; --sky: #4cb3f2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15181c;
+    --fg: #eef0f3;
+    --muted: #a3aab4;
+    --line: #2b3038;
+    --card: #1e2228;
+    --hover: rgba(255, 255, 255, .07);
+    --ring: #06c755;
+    --accent-text: #3ddc7f;
+    --sun-text: #ffd23f;
+    --warn-bg: #3a2f14;
+    --warn-fg: #f0c674;
+    --error-bg: #3a1f1f;
+    --error-fg: #f5a3a3;
+    --ok: #3ddc7f;
+  }
+}
+
+* { box-sizing: border-box; }
+p { margin: 0; }
+
+body {
+  width: 340px;
+  margin: 0;
+  padding: var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+[hidden] { display: none !important; }
+
+/* --- header ----------------------------------------------------------------- */
+.head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
+h1 { font-size: 15px; margin: 0; letter-spacing: -0.01em; }
+
+/* Phil (src/common/phil.js): hops in when the popup opens, blinks now and then, tilts on hover. */
+.phil { display: block; width: 100%; height: 100%; overflow: visible; }
+.phil-eyes { transform-box: fill-box; transform-origin: center; }
+/* The angler's light breathes. */
+.phil-glow { transform-box: fill-box; transform-origin: center; animation: glow 2.4s ease-in-out infinite; }
+@keyframes glow { 50% { opacity: .35; transform: scale(.8); } }
+/* The stalk is a thin ink line, lost on a dark page: grey-white there. */
+@media (prefers-color-scheme: dark) { .phil-stalk { stroke: #d6d7e6; } }
+.brand { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.logo { width: 30px; height: 30px; flex: none; transform-origin: 50% 80%;
+  animation: logo-hello .7s .1s cubic-bezier(.34, 1.56, .64, 1) both;
+  transition: transform .2s cubic-bezier(.34, 1.56, .64, 1); }
+.brand:hover .logo { transform: translateY(-1px) rotate(-8deg) scale(1.06); }
+.logo .phil-eyes { animation: blink 4.6s 1.6s infinite; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(.12); } }
+@keyframes logo-hello { 0% { transform: translateY(6px) scale(.7); } 55% { transform: translateY(-4px) scale(1.06); } 100% { transform: none; } }
+
+/* "philform", with the second half in green. */
+.wordmark { font-family: var(--round); font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.wordmark span { color: var(--accent-text); }
+@media (prefers-color-scheme: dark) { .wordmark { color: var(--fg); } }
+
+/* Which build this is: the number tools/dev.py prints, or the store version. */
+.build { font-size: 9.5px; font-weight: 700; letter-spacing: .02em; padding: 0 5px; border-radius: 999px; white-space: nowrap;
+  color: var(--muted); background: var(--card); border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.build.dev { color: var(--accent-text); background: rgba(6, 199, 85, .1); border-color: rgba(6, 199, 85, .4); }
+
+/* --- buttons ---------------------------------------------------------------- */
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ring); outline-offset: 2px;
+}
+button svg { width: 16px; height: 16px; flex: none; }
+
+/* The one action that matters: a chunky button on a darker ledge, as in
+   Duolingo, that presses down into it. */
+button.primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  padding: 0 var(--s4);
+  height: 36px;
+  font-weight: 700;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border: 0;
+  border-radius: var(--r-btn);
+  box-shadow: 0 4px 0 var(--accent-edge);
+  margin-bottom: 4px;
+  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+}
+button.primary:not(:disabled):hover { filter: brightness(1.08); }
+button.primary:not(:disabled):active { transform: translateY(4px); box-shadow: 0 0 0 var(--accent-edge); }
+button.primary:disabled { filter: grayscale(.6); opacity: .5; }
+button.primary.cta { width: 100%; height: 48px; font-family: var(--round); font-size: 16px; font-weight: 800; letter-spacing: .01em; }
+button.primary.cta svg { width: 18px; height: 18px; fill: currentColor; }
+button.primary.small { height: 32px; padding: 0 var(--s3); font-size: 13px; }
+
+button.secondary {
+  width: 100%;
+  height: 38px;
+  padding: 0 var(--s3);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  font-weight: 550;
+  transition: background .15s, border-color .15s;
+}
+button.secondary:not(:disabled):hover { background: var(--hover); border-color: var(--muted); }
+button.secondary:disabled { opacity: .55; }
+
+/* Quiet extras: a label with a hover fill, never an underlined link. */
+button.ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 var(--s2);
+  background: transparent; border: 0; border-radius: 8px;
+  color: var(--muted); font-weight: 550;
+  transition: background .15s, color .15s;
+}
+button.ghost:hover { background: var(--hover); color: var(--fg); }
+button.ghost.small { height: 28px; font-size: 12px; }
+.icon-btn svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+
+/* An action inside a notice: sits in the notice's own colour. */
+button.chip {
+  align-self: flex-start;
+  height: 30px; padding: 0 var(--s3);
+  background: rgba(255, 255, 255, .6); color: inherit;
+  border: 1px solid currentColor; border-radius: 999px;
+  font-size: 12px; font-weight: 650;
+}
+button.chip:hover { background: rgba(255, 255, 255, .9); }
+@media (prefers-color-scheme: dark) { button.chip { background: rgba(0, 0, 0, .2); } button.chip:hover { background: rgba(0, 0, 0, .35); } }
+
+.row { display: flex; justify-content: space-between; align-items: center; gap: var(--s2); }
+
+/* The Fill button is always in sight: a bar pinned to the popup's bottom
+   edge, fading out what scrolls under it so it is clear there is more. */
+.actions { display: flex; flex-direction: column; gap: var(--s2);
+  position: sticky; bottom: 0; z-index: 5;
+  margin: 0 calc(-1 * var(--s4)); padding: var(--s2) var(--s4) var(--s3); background: var(--bg); }
+.actions::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 22px;
+  background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; }
+
+/* A fill shown again when the popup is reopened: one line and its to-dos. */
+.result.compact .disclosure, .result.compact #result-cost { display: none; }
+.result.compact .result-headline { font-size: 13px; }
+
+/* --- cards ------------------------------------------------------------------ */
+.card {
+  display: flex; flex-direction: column; gap: var(--s2);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: var(--s3);
+}
+.card-title { font-weight: 650; }
+.fine { font-size: 12px; color: var(--muted); }
+.fine:empty { display: none; }
+
+.notice { border-color: transparent; }
+.notice.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.notice.error { background: var(--error-bg); color: var(--error-fg); }
+.notice.info { background: var(--card); color: var(--fg); }
+
+/* The page: what job this is and how much there is to fill. */
+.card.page { flex-direction: row; align-items: center; gap: var(--s3); }
+.page-icon { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 10px;
+  background: rgba(6, 199, 85, .12); color: var(--accent-text); }
+.page-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.page-text { min-width: 0; }
+.page-role { font-weight: 650; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.page-fields { font-size: 12px; color: var(--muted); }
+.page-fields:empty { display: none; }
+
+/* --- progress: a chunky bar that fills in steps ------------------------- */
+.progress .prog-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
+.prog-stage { font-family: var(--round); font-weight: 700; }
+.prog-count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Phil runs along the top of the bar, at its leading edge. */
+.track { position: relative; padding-top: 30px; }
+.runner { position: absolute; top: 0; left: 15px; width: 30px; height: 32px; margin-left: -15px;
+  transition: left 0.45s cubic-bezier(.34, 1.56, .64, 1); }
+.runner .phil { transform: rotate(6deg); transform-origin: 50% 100%; }
+/* A run cycle: each foot pushes back along the ground, then lifts and swings
+   forward, the two half a stride apart. The body rises as a foot swings, so a
+   lifted foot never climbs onto the face, and settles as it lands.
+   (SVG units: Phil is 104 across.) */
+.phil-running .phil-body { animation: bob .23s cubic-bezier(.45, 0, .55, 1) infinite; }
+.phil-running .phil-foot { animation: step .46s linear infinite; }
+.phil-running .phil-foot-r { animation-delay: -.23s; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes step {
+  0% { transform: translate(4px, 0); }
+  50% { transform: translate(-4px, 0); }
+  62% { transform: translate(-2.5px, -2.5px); }
+  75% { transform: translate(0, -3px); }
+  88% { transform: translate(2.5px, -2px); }
+  100% { transform: translate(4px, 0); }
+}
+/* A puff of dust behind each step, in time with the feet. */
+.runner::before { content: ""; position: absolute; left: -4px; bottom: 1px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--line); animation: puff .23s ease-out infinite; }
+@keyframes puff { from { transform: translateX(3px) scale(.5); opacity: .9; } to { transform: translateX(-7px) scale(1.3); opacity: 0; } }
+
+.bar {
+  position: relative;
+  height: 14px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  position: relative;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(var(--win), var(--win-dark));
+  transition: width 0.45s cubic-bezier(.34, 1.56, .64, 1);
+  overflow: hidden;
+}
+/* The light stripe along the top, and a shine that sweeps across. */
+.bar-fill::before {
+  content: ""; position: absolute; left: 6px; right: 6px; top: 3px; height: 3px;
+  border-radius: 999px; background: rgba(255, 255, 255, .35);
+}
+.bar-fill::after {
+  content: ""; position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent);
+  animation: shine 1.4s ease-in-out infinite;
+}
+@keyframes shine { from { transform: translateX(-120%); } to { transform: translateX(320%); } }
+
+.steps { display: flex; justify-content: space-between; list-style: none; margin: 0 2px; padding: 0; font-size: 11px; color: var(--muted); }
+.steps li { display: flex; align-items: center; gap: 5px; }
+.steps .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); transition: background .2s; }
+.steps li.done { color: var(--fg); }
+.steps li.done .dot { background: var(--win); animation: pop .35s cubic-bezier(.34, 1.56, .64, 1); }
+.steps li.now .dot { background: var(--sun); animation: pulse 1s ease-in-out infinite; }
+@keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@keyframes pulse { 50% { transform: scale(1.3); } }
+
+/* --- the result ------------------------------------------------------------- */
+.result { gap: var(--s2); }
+.result-headline { font-weight: 650; }
+
+.reward { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
+  padding: 0 0 var(--s3); border-bottom: 1px solid var(--line); }
+/* Phil beside the time saved, the pair centred. */
+.hero { position: relative; display: flex; align-items: center; gap: var(--s3); text-align: left; }
+/* Phil jumps for joy, then bounces twice more. */
+.medal { width: 52px; height: 52px; flex: none; transform-origin: 50% 100%;
+  animation: medal-in .6s cubic-bezier(.34, 1.56, .64, 1), cheer .5s .7s ease-in-out 2; }
+@keyframes medal-in { 0% { transform: translateY(24px) scale(.3); } 60% { transform: translateY(-10px) scale(1.08, .95); } 100% { transform: none; } }
+@keyframes cheer { 30% { transform: translateY(0) scale(1.06, .92); } 60% { transform: translateY(-8px) scale(.96, 1.04); } }
+
+.reward-label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
+.reward-time { font-family: var(--round); font-size: 30px; line-height: 1.1; font-weight: 800; color: var(--accent-text); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+/* Spent against saved, side by side: a small grey number and a big green one. */
+.trade { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); width: 100%; margin-top: 10px; }
+.trade:has(> .spent[hidden]) { grid-template-columns: 1fr; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px var(--s2) var(--s2);
+  border-radius: 12px; border: 2px solid var(--line); background: var(--bg); box-shadow: 0 3px 0 var(--line); }
+.tile-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.tile b { font-family: var(--round); font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--fg); }
+.tile.saved { border-color: var(--win); box-shadow: 0 3px 0 var(--win-dark); background: rgba(6, 199, 85, .07); }
+.tile.saved b { color: var(--accent-text); }
+.reward-rate { margin-top: 6px; font-size: 12px; color: var(--muted); }
+/* "· 9 free left" or "· 800× what it cost", on the same line. */
+.return { font-weight: 800; color: var(--accent-text); }
+.return::before { content: "· "; color: var(--muted); font-weight: 400; }
+.return:empty { display: none; }
+
+/* Today's applications towards the daily goal: five steps that fill in. */
+.goal { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: var(--s2); }
+.reward-streak { font-size: 12px; font-weight: 800; color: var(--sun-text); }
+.reward-streak:empty { display: none; }
+
+/* The day streak in the header: a flame and the number of days. */
+.streak-chip { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; padding: 2px 8px 2px 5px;
+  border-radius: 999px; font-family: var(--round); font-size: 14px; font-weight: 800; color: #e07b00;
+  background: rgba(255, 200, 0, .16); font-variant-numeric: tabular-nums; }
+.streak-chip svg { width: 16px; height: 16px; fill: #ff9600; }
+.streak-chip.cold { color: var(--muted); background: var(--card); }
+.streak-chip.cold svg { fill: var(--muted); opacity: .6; }
+.streak-chip.lit { animation: flare .7s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes flare { 0% { transform: scale(.6); } 50% { transform: scale(1.3) rotate(-6deg); } 100% { transform: none; } }
+@media (prefers-color-scheme: dark) { .streak-chip { color: #ffb340; } }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.wage-chip { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px;
+  border: 1px dashed var(--muted); background: transparent; color: var(--fg); }
+.wage-chip:hover { border-style: solid; background: var(--hover); }
+.wage-form { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 6px; font-size: 12px; }
+.wage-form input { width: 64px; font: inherit; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); }
+
+/* Confetti: pieces thrown out from the medal, each with its own path. */
+.burst { position: absolute; left: 26px; top: 26px; width: 0; height: 0; pointer-events: none; }
+.burst i { position: absolute; width: 7px; height: 11px; border-radius: 2px; background: var(--c);
+  animation: fly 1s cubic-bezier(.15, .7, .3, 1) forwards; opacity: 0; }
+.burst i.round { width: 8px; height: 8px; border-radius: 50%; }
+.burst i.petal { width: 10px; height: 10px; border-radius: 0 80% 0 80%; }
+@keyframes fly {
+  0% { transform: translate(0, 0) rotate(0) scale(.6); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); opacity: 0; }
+}
+
+/* What to do next, one short line each; amber for the ones to check. */
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.checklist:empty { display: none; }
+.checklist li { position: relative; padding-left: 20px; }
+.checklist li::before { content: ""; position: absolute; left: 3px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); opacity: .5; }
+.checklist li.first { font-weight: 600; }
+.checklist li.first::before { background: var(--win); opacity: 1; }
+.checklist li.check::before { background: #f59e0b; opacity: 1; }
+.checklist li.ask { font-weight: 600; }
+.checklist li.ask::before { background: var(--win); opacity: 1; box-shadow: 0 0 0 3px rgba(6, 199, 85, .2); }
+.checklist li .chip { margin-left: 4px; vertical-align: baseline; }
+
+.callout { display: flex; flex-direction: column; gap: var(--s2); padding: 10px var(--s3); border-radius: 10px;
+  background: var(--warn-bg); color: var(--warn-fg); font-size: 12px; }
+
+.disclosure { border-top: 1px solid var(--line); padding-top: var(--s2); }
+.disclosure + .disclosure { border-top: 0; padding-top: 0; }
+.disclosure summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--muted); list-style: none;
+  display: flex; align-items: center; gap: 6px; min-height: 24px; border-radius: 6px; }
+.disclosure summary::-webkit-details-marker { display: none; }
+.disclosure summary::before { content: ""; width: 6px; height: 6px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor;
+  transform: rotate(-45deg); transition: transform .15s; margin: 0 3px; }
+.disclosure[open] summary::before { transform: rotate(45deg); }
+.disclosure summary:hover { color: var(--fg); }
+
+.stats { list-style: none; margin: var(--s2) 0 0; padding: 0; display: grid; grid-template-columns: 1fr auto; gap: 3px var(--s3);
+  font-size: 12px; color: var(--muted); }
+.stats li { display: contents; }
+.stats b { color: var(--fg); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.cost-parts { list-style: none; margin: var(--s2) 0 0; padding: var(--s2) 0 0; border-top: 1px dashed var(--line);
+  font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.unfilled { margin: var(--s2) 0 0; padding-left: var(--s4); font-size: 12px; color: var(--muted); }
+.unfilled li + li { margin-top: 2px; }
+.warn-text { color: #b45309; }
+@media (prefers-color-scheme: dark) { .warn-text { color: #f0c674; } }
+
+.result .row { margin: 0 calc(-1 * var(--s2)) calc(-1 * var(--s1)); }
+/* Ghost buttons at an edge sit flush with the text above them, not with their padding. */
+.head .ghost, .foot .ghost { margin-right: calc(-1 * var(--s2)); }
+
+/* --- site support: a circle for how well phil knows this kind of page --------- */
+.page-support { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+.support-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 2px solid var(--muted); box-sizing: border-box; }
+.support-dot.full { background: var(--win); border-color: var(--win); }
+.support-dot.partial { background: #f59e0b; border-color: #f59e0b; }
+.support-dot.seen { background: #3b82f6; border-color: #3b82f6; }
+.support-dot.new { background: transparent; }
+
+/* --- rating: a thumb after a fill ------------------------------------------- */
+.rate { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s2); font-size: 12px; color: var(--muted); }
+.rate-ask { margin-right: auto; font-weight: 600; }
+.thumb { width: 38px; height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); cursor: pointer; transition: transform .1s; }
+.thumb svg { width: 18px; height: 18px; fill: currentColor; }
+.thumb.down svg { transform: rotate(180deg); }
+.thumb:hover { border-color: var(--win); color: var(--win); transform: scale(1.06); }
+.thumb.down:hover { border-color: #b45309; color: #b45309; }
+.thumb[aria-pressed="true"] { background: var(--win); border-color: var(--win); color: #fff; }
+.thumb.down[aria-pressed="true"] { background: #b45309; border-color: #b45309; }
+.thumb:disabled { cursor: default; opacity: .7; transform: none; }
+.thumb:disabled:not([aria-pressed="true"]) { opacity: .4; }
+.chip svg { width: 13px; height: 13px; fill: currentColor; transform: rotate(180deg); vertical-align: -2px; margin-right: 3px; }
+@media (prefers-reduced-motion: reduce) { .thumb, .thumb:hover { transition: none; transform: none; } }
+
+/* --- report ----------------------------------------------------------------- */
+#report textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 12px;
+  padding: var(--s2);
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.report-mail { margin-top: var(--s2); }
+.report-mail a { color: var(--accent); }
+
+/* --- save answers from the page -------------------------------------------- */
+.learn-list { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow-y: auto; }
+.learn-list:empty { display: none; }
+.learn-list li { display: flex; gap: 10px; align-items: center; padding: var(--s2) 0; border-top: 1px solid var(--line); }
+.learn-list li:first-child { border-top: 0; }
+.learn-list .q { font-weight: 600; font-size: 12px; }
+.learn-list .a { font-size: 12px; opacity: .8; word-break: break-word; }
+.learn-list .to { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.learn-list .text { flex: 1; min-width: 0; }
+/* A small solid button beside the answer, not the full-width outline one. */
+.learn-list button.act {
+  flex: none; width: auto; height: 30px; padding: 0 var(--s3);
+  font-size: 12px; font-weight: 650;
+  color: var(--accent-fg); background: var(--accent); border: 0; border-radius: 8px;
+}
+.learn-list button.act:not(:disabled):hover { filter: brightness(1.06); }
+.learn-list button.act:disabled { opacity: .5; }
+.learn-list .done { flex: none; font-size: 12px; font-weight: 600; color: var(--ok); }
+
+/* --- all time, and the footer ---------------------------------------------- */
+.alltime { display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); border-radius: 12px;
+  background: var(--card); border: 1px solid var(--line); font-size: 12px; font-variant-numeric: tabular-nums; }
+.alltime .clock { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--win-dark); stroke-width: 1.6; stroke-linecap: round; }
+.alltime-line { color: var(--muted); }
+.alltime-line b { color: var(--fg); }
+.alltime-line #alltime-money { color: var(--accent-text); }
+.alltime.bump { animation: bump .5s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes bump { 40% { transform: scale(1.04); background: rgba(6, 199, 85, .12); } }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: calc(-1 * var(--s1)) 0 calc(-1 * var(--s2));
+  padding-top: var(--s1);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo, .logo .phil-eyes, .phil-glow, button.primary { animation: none !important; transition: none !important; }
+  .runner, .runner::before, .phil-running .phil-body, .phil-running .phil-foot { animation: none !important; transition: none !important; }
+  .bar-fill, .bar-fill::after, .steps .dot, .medal, .burst i, .alltime.bump,   .runner::before, .burst { display: none; }
+}
+
+/* --- the wallet ------------------------------------------------------------- */
+.wallet { display: flex; align-items: center; gap: var(--s2); padding: 6px 6px 6px var(--s3); border-radius: 12px;
+  background: var(--card); border: 1px solid var(--line); font-size: 12px; font-variant-numeric: tabular-nums; }
+.wallet-icon { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--sun-text); stroke-width: 1.6; stroke-linecap: round; }
+.wallet-text { flex: 1; min-width: 0; color: var(--muted); }
+.wallet-text b { color: var(--fg); font-size: 13px; }
+.wallet-dev { margin-left: 2px; font-size: 10px; font-weight: 700; padding: 0 5px; border-radius: 999px;
+  color: var(--muted); border: 1px dashed var(--muted); }
+/* Add $5: gold, chunky like the main button but small. */
+.wallet .reload { flex: none; height: 28px; padding: 0 var(--s3); border: 0; border-radius: 9px; font-weight: 800; font-size: 12px;
+  color: #3d2b00; background: var(--sun); box-shadow: 0 3px 0 #d9a400; margin-bottom: 3px; transition: transform .08s, box-shadow .08s; }
+.wallet .reload:not(:disabled):active { transform: translateY(3px); box-shadow: 0 0 0 #d9a400; }
+.wallet .reload:disabled { opacity: .6; }
+.wallet.bump { animation: bump .5s cubic-bezier(.34, 1.56, .64, 1); }
+@media (prefers-reduced-motion: reduce) { .wallet.bump, .wallet .reload { animation: none !important; transition: none !important; } }
+
+/* Running low: one quiet line under the wallet, shown once. */
+.wallet-low { display: flex; align-items: center; gap: 6px; margin-top: calc(-1 * var(--s2)); padding: 0 var(--s1) 0 var(--s3);
+  font-size: 12px; color: var(--sun-text); }
+.wallet-low span { flex: 1; }
+.wallet-low .link { border: 0; background: none; padding: 2px 4px; font-weight: 800; color: var(--sun-text); text-decoration: underline; text-underline-offset: 2px; }
+.wallet-low .close { border: 0; background: none; padding: 0 4px; font-size: 16px; line-height: 1; color: var(--muted); }
+.wallet-low .close:hover, .wallet-low .link:hover { color: var(--fg); }
+
+/* --- the password lock, and keeping the wallet ------------------------------------- */
+.unlock-row { display: flex; gap: var(--s2); margin-top: var(--s2); }
+.unlock-row input { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); }
+.wallet-keep { border: 0; background: none; padding: 2px 4px; font: inherit; font-size: 11px; font-weight: 700; color: var(--win-dark, #04873b); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap; }

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>philform</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="head">
+    <h1 class="brand">
+      <span class="logo" data-phil="calm"></span>
+      <span class="wordmark">phil<span>form</span></span>
+      <span id="build" class="build" hidden></span>
+    </h1>
+    <span id="streak-chip" class="streak-chip" hidden title="Days in a row you applied with phil. Apply tomorrow to keep it going.">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10.6 1.8c.3 2.4-1 3.9-2.3 5.4C7 8.7 5.6 10.3 5.6 12.7a4.4 4.4 0 0 0 8.8 0c0-1.6-.6-2.9-1.4-3.9-.2 1-.8 1.8-1.6 2.2.6-3.1-.2-6.6-.8-9.2z"/></svg>
+      <b id="streak-days">0</b><span class="sr">day streak</span>
+    </span>
+    <button id="open-settings" class="ghost icon-btn" type="button" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>
+    </button>
+  </header>
+
+  <section id="locked" class="card locked" hidden>
+    <p class="card-title">philform is locked</p>
+    <p class="fine">Enter your password to open your details for this browser session.</p>
+    <form id="unlock-form" class="unlock-row">
+      <input id="unlock-password" type="password" autocomplete="current-password" placeholder="Password" aria-label="Your philform password">
+      <button class="primary small" type="submit">Unlock</button>
+    </form>
+    <p class="fine warn-text" id="unlock-result"></p>
+  </section>
+
+  <section id="page-info" class="card page">
+    <span class="page-icon" aria-hidden="true">
+      <svg viewBox="0 0 20 20"><rect x="4" y="2.5" width="12" height="15" rx="2.5"/><path d="M7 7h6M7 10h6M7 13h3.5"/></svg>
+    </span>
+    <div class="page-text">
+      <p class="page-role" id="page-role">Checking this page...</p>
+      <p class="page-fields" id="page-fields"></p>
+      <p class="page-support" id="page-support" hidden><span class="support-dot" id="support-dot" aria-hidden="true"></span><span id="support-text"></span></p>
+    </div>
+  </section>
+
+  <section id="warning" class="card notice warn" hidden>
+    <p id="warning-text"></p>
+    <button id="warning-action" class="chip" type="button">Open settings</button>
+  </section>
+
+  <section id="update" class="card notice info" hidden>
+    <p id="update-text"></p>
+    <button id="update-action" class="chip" type="button">Update now</button>
+  </section>
+
+  <section id="frames" class="card notice warn" hidden>
+    <p id="frames-text"></p>
+    <button id="frames-allow" class="chip" type="button">Allow access</button>
+    <button id="frames-reload" class="chip" type="button" hidden>Reload page</button>
+  </section>
+
+  <section id="progress" class="card progress" hidden>
+    <div class="prog-top">
+      <span class="prog-stage" id="progress-stage">Working...</span>
+      <span class="prog-count" id="progress-count"></span>
+    </div>
+    <div class="track">
+      <span class="runner" id="progress-runner" data-phil="running" aria-hidden="true"></span>
+      <div class="bar"><div class="bar-fill" id="progress-bar"></div></div>
+    </div>
+    <ol class="steps" id="progress-steps" aria-hidden="true">
+      <li data-step="0"><span class="dot"></span>Read</li>
+      <li data-step="1"><span class="dot"></span>Match</li>
+      <li data-step="2"><span class="dot"></span>Fill</li>
+    </ol>
+  </section>
+
+  <section id="result" class="card result" hidden>
+    <div id="reward" class="reward" hidden>
+      <div class="hero">
+        <div class="burst" id="reward-burst" aria-hidden="true"></div>
+        <div class="medal" data-phil="happy" aria-hidden="true"></div>
+        <div>
+          <p class="reward-label">phil just saved you</p>
+          <p class="reward-time" id="reward-time" aria-live="polite">0 min</p>
+        </div>
+      </div>
+      <div class="trade">
+        <div class="tile spent" id="reward-spent-line"><span class="tile-label">You spent</span><b id="reward-spent">$0</b></div>
+        <div class="tile saved"><span class="tile-label">You saved</span><b id="reward-money">$0.00</b></div>
+      </div>
+      <p class="reward-rate">of your time at
+        <button id="wage-edit" class="wage-chip" type="button" title="Change what an hour of your time is worth">$16/hr</button>
+        <span id="reward-return" class="return"></span></p>
+      <form id="wage-form" class="wage-form" hidden>
+        <label>Your time is worth $<input id="wage-input" type="number" min="0" max="1000" step="0.5" inputmode="decimal"> an hour</label>
+        <button class="primary small" type="submit">Save</button>
+      </form>
+      <div class="goal" id="reward-goal" hidden>
+        <p class="reward-streak" id="reward-streak"></p>
+      </div>
+    </div>
+    <p class="result-headline" id="result-headline"></p>
+    <ul class="checklist" id="result-note"></ul>
+    <div id="result-missed" class="callout" hidden>
+      <p id="result-missed-text"></p>
+      <button class="chip rate-down" type="button">Report this page</button>
+    </div>
+    <p class="fine" id="result-cost"></p>
+    <p class="fine warn-text" id="result-capped" hidden></p>
+    <details id="result-details" class="disclosure" hidden>
+      <summary>Fields left empty</summary>
+      <ul class="unfilled" id="result-unfilled"></ul>
+    </details>
+    <details id="result-cost-details" class="disclosure">
+      <summary>How it was filled</summary>
+      <ul class="stats" id="result-stats"></ul>
+      <ul class="cost-parts" id="result-cost-parts"></ul>
+    </details>
+    <div class="rate" id="rate">
+      <span class="rate-ask">How did phil do?</span>
+      <button id="rate-up" class="thumb" type="button" title="Good" aria-label="Good fill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 9h3v9H2zM7 18V9l3.6-6.6c.6-1.1 2.4-.7 2.4.6V8h4.2c1.3 0 2.2 1.2 1.9 2.4l-1.5 6c-.2.9-1 1.6-1.9 1.6z"/></svg></button>
+      <button id="rate-down" class="thumb down rate-down" type="button" title="Something went wrong" aria-label="Something went wrong"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 9h3v9H2zM7 18V9l3.6-6.6c.6-1.1 2.4-.7 2.4.6V8h4.2c1.3 0 2.2 1.2 1.9 2.4l-1.5 6c-.2.9-1 1.6-1.9 1.6z"/></svg></button>
+      <span class="fine" id="rate-result"></span>
+    </div>
+    <div class="row">
+      <button id="clear-highlights" class="ghost" type="button">Remove highlights</button>
+    </div>
+  </section>
+
+  <section id="report" class="card" hidden>
+    <p class="card-title">Send us feedback</p>
+    <p class="fine" id="report-intro">This page's address is on its way to us for review, never your answers. Tell us what went wrong and we fix it faster.</p>
+    <textarea id="report-note" rows="3" placeholder="What went wrong, or what would make phil better?"></textarea>
+    <div class="row">
+      <button id="report-close" class="ghost" type="button">Close</button>
+      <button id="report-send" class="primary small" type="button">Send feedback</button>
+    </div>
+    <p class="fine" id="report-result"></p>
+    <p class="fine report-mail">Rather write an email? <a id="report-mail" href="mailto:support@philformapp.com">support@philformapp.com</a></p>
+  </section>
+
+  <section id="error" class="card notice error" hidden>
+    <p id="error-text"></p>
+    <button class="chip rate-down" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 9h3v9H2zM7 18V9l3.6-6.6c.6-1.1 2.4-.7 2.4.6V8h4.2c1.3 0 2.2 1.2 1.9 2.4l-1.5 6c-.2.9-1 1.6-1.9 1.6z"/></svg> Report this page</button>
+  </section>
+
+  <div class="actions">
+    <button id="fill" class="primary cta" type="button" disabled>
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11.5 2 4 11.5h5.5L8.5 18 16 8.5h-5.5z"/></svg>
+      <span id="fill-label">phil this application</span>
+    </button>
+    <button id="cancel" class="secondary" type="button" hidden>Cancel</button>
+  </div>
+  <button id="learn" class="secondary" type="button"
+    title="Typed something in yourself, or corrected an answer? Save it, and phil fills it for you next time.">Save my answers from this page</button>
+
+  <section id="learn-panel" class="card" hidden>
+    <p class="card-title" id="learn-headline"></p>
+    <p class="fine" id="learn-hint" hidden>Save the ones you want filled next time. You can change them later in Settings.</p>
+    <ul class="learn-list" id="learn-list"></ul>
+    <div class="row">
+      <button id="learn-close" class="ghost" type="button">Close</button>
+      <button id="learn-save" class="primary small" type="button">Save all</button>
+    </div>
+  </section>
+
+  <div id="alltime" class="alltime" hidden title="Everything phil has saved you, and what it cost">
+    <svg class="clock" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+    <p class="alltime-line" id="alltime-line"><span id="alltime-spent-part">You've spent <b id="alltime-spent">$0</b> and saved</span><span id="alltime-saved-part">You've saved</span>
+      <b id="alltime-money">$0.00</b> of your time <span class="alltime-time">(<span id="alltime-time">0 min</span>)</span></p>
+  </div>
+
+  <div id="wallet" class="wallet" hidden title="Like a transport card: phil takes what each fill uses. Your first applications are free.">
+    <svg class="wallet-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="5" width="15" height="11" rx="2.5"/><path d="M2.5 8.5h15M13 12.2h1.6"/></svg>
+    <p class="wallet-text"><b id="wallet-balance">$0</b> <span id="wallet-free"></span>
+      <span id="wallet-dev" class="wallet-dev" hidden title="Dev build: a test wallet that starts over with 10 free applications and $5 when it runs out">test</span></p>
+    <button id="wallet-reload" class="reload" type="button">Add $5</button>
+    <button id="wallet-keep" class="link wallet-keep" type="button" hidden title="Add your email so you keep this wallet if you reinstall philform">Keep it safe</button>
+  </div>
+  <p id="wallet-low" class="wallet-low" hidden>
+    <span id="wallet-low-text">Running low</span>
+    <button id="wallet-low-add" class="link" type="button">Add $5</button>
+    <button id="wallet-low-close" class="close" type="button" aria-label="Dismiss">×</button>
+  </p>
+
+  <footer class="foot">
+    <span id="usage-line"></span>
+    <button id="open-skills" class="ghost small" type="button" hidden>Site skills</button>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

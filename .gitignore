@@ -1,0 +1,25 @@
+dist/
+.DS_Store
+*.zip
+
+# Local API keys. Never commit these.
+src/common/local-config.js
+
+# The development loop (tools/dev.py): browser profile, dev build and saved runs.
+.dev/
+src/common/dev-config.js
+
+# Claude Code permissions on this machine.
+.claude/settings.local.json
+
+# The backend's local data (accounts and wallets) when run on this machine.
+backend/data/
+
+cloudflare-creds.txt
+
+.creds.env
+
+# Claude Code notes that stay private (handover, business plans).
+CLAUDE.local.md
+
+__pycache__/

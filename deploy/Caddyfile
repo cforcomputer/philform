@@ -1,0 +1,57 @@
+# Philform's service. Caddy fetches and renews the HTTPS certificate itself.
+philformapp.com {
+	encode gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		-Server
+	}
+	# The privacy policy, rendered from the repo's PRIVACY.md.
+	handle /privacy {
+		root * /opt/philform/site
+		rewrite * /privacy.html
+		templates
+		file_server
+	}
+	# The service itself.
+	handle /v1/* {
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle /health {
+		reverse_proxy 127.0.0.1:8787
+	}
+	# The website, Phil's drawing and icons, and the self-distributed Firefox
+	# builds (updates.json and the signed .xpi files).
+	handle {
+		root * /opt/philform/site
+		header /fonts/* Cache-Control "public, max-age=31536000, immutable"
+		# Installed copies read this from the popup to offer an update before
+		# Firefox's own daily check finds it.
+		header /firefox/updates.json {
+			Access-Control-Allow-Origin *
+			Cache-Control no-cache
+		}
+		try_files {path} {path}.html
+		file_server
+	}
+}
+
+www.philformapp.com {
+	redir https://philformapp.com{uri} permanent
+}
+
+# The old address: the service keeps answering there (Stripe's webhook until
+# its dashboard points at the new one), the pages move.
+philform.geckur.com {
+	handle /v1/* {
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle {
+		redir https://philformapp.com{uri} permanent
+	}
+}
+
+# Anything reaching the bare IP gets nothing.
+:80 {
+	respond 404
+}

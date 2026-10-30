@@ -1,0 +1,21 @@
+[Unit]
+Description=Philform service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=philform
+WorkingDirectory=/opt/philform
+EnvironmentFile=/etc/philform.env
+Environment=PHILFORM_DATA=/var/lib/philform/db.json
+ExecStart=/usr/bin/node backend/server.mjs
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/philform
+
+[Install]
+WantedBy=multi-user.target

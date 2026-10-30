@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>philform practice application</title>
+<meta name="description" content="A practice job application for trying philform. Nothing you enter here is sent anywhere.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#06c755">
+<link rel="icon" href="/icon32.png">
+<link rel="stylesheet" href="/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  "title": "Junior Data Analyst (practice)",
+  "description": "This is a practice posting for trying philform. Globex Lighting makes energy-efficient street lights for small cities. The Junior Data Analyst builds weekly reports on lamp failures and energy use, cleans data from field crews, and helps the operations team decide which streets to upgrade first. You will work in SQL and spreadsheets, and talk with crews and city staff to understand what the numbers mean.",
+  "datePosted": "2026-10-27",
+  "employmentType": "FULL_TIME",
+  "hiringOrganization": { "@type": "Organization", "name": "Globex Lighting (practice)" },
+  "jobLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressLocality": "Portland", "addressRegion": "OR", "addressCountry": "US" } },
+  "baseSalary": { "@type": "MonetaryAmount", "currency": "USD", "value": { "@type": "QuantitativeValue", "minValue": 62000, "maxValue": 74000, "unitText": "YEAR" } }
+}
+</script>
+<style>
+  .demo { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  .demo-guide { background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--r); padding: 20px 22px; margin: 18px 0 28px; }
+  .demo-guide h2 { font-family: var(--round); font-size: 20px; margin: 0 0 10px; }
+  .demo-guide ol { margin: 0; padding-left: 22px; line-height: 1.6; }
+  .demo-guide li + li { margin-top: 6px; }
+  .demo-guide .tip { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+  .demo-posting { border-left: 3px solid var(--win); padding: 4px 0 4px 16px; margin: 0 0 28px; color: var(--muted); }
+  .demo-posting h1 { color: var(--fg); font-family: var(--round); font-size: 26px; margin: 0 0 4px; }
+  .demo form { display: grid; gap: 18px; }
+  .demo fieldset { border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin: 0; display: grid; gap: 14px; }
+  .demo legend { font-weight: 700; padding: 0 6px; }
+  .demo label { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+  .demo .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .demo .row { grid-template-columns: 1fr; } }
+  .demo input[type=text], .demo input[type=email], .demo input[type=tel], .demo input[type=url], .demo select, .demo textarea {
+    font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); width: 100%; box-sizing: border-box; }
+  .demo textarea { min-height: 120px; resize: vertical; }
+  .demo .choices { display: flex; gap: 18px; font-weight: 400; }
+  .demo .choices label { display: flex; align-items: center; gap: 6px; font-weight: 400; }
+  .demo .req { color: #d14343; }
+  .demo .hint { color: var(--muted); font-size: 13px; font-weight: 400; }
+  .demo-done { display: none; background: #e8f9ef; color: #04632b; border-radius: 14px; padding: 14px 16px; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .demo-done { background: #12311f; color: #7fe3a8; } }
+  .demo-done.on { display: block; }
+</style>
+</head>
+<body class="page">
+
+<header class="nav" id="nav">
+  <a class="brand" href="/" aria-label="philform home">
+    <span class="brand-phil" data-phil="calm"></span>
+    <span class="wordmark">phil<span>form</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="/#how">How it works</a>
+    <a href="/support">Support</a>
+  </nav>
+  <a class="btn btn-small" href="/#start">Get philform</a>
+</header>
+
+<main class="demo">
+  <section class="demo-guide" aria-labelledby="guide-title">
+    <h2 id="guide-title">Try phil on this practice form</h2>
+    <ol>
+      <li><b>Pin phil to your toolbar.</b> Click the puzzle piece at the top right of your browser, then the pin next to philform.</li>
+      <li><b>Click phil</b> in the toolbar, then press <b>phil this application</b>.</li>
+      <li><b>Check every answer.</b> Answers outlined in amber are phil's best guess. Fix anything that is not right.</li>
+      <li><b>Tell phil how it did.</b> Press the thumbs up or down in the popup. A thumbs down sends this page for review, never your answers.</li>
+    </ol>
+    <p class="tip">This is only practice: nothing you enter here is sent anywhere, and practice fills do not use your free applications.
+      If a box stays empty, phil does not know that detail yet: add it on the Profile tab and press <b>Save profile</b>.</p>
+  </section>
+
+  <section class="demo-posting">
+    <h1>Junior Data Analyst</h1>
+    <p>Globex Lighting (practice) · Portland, OR · $62,000 to $74,000 a year</p>
+    <p>Globex Lighting makes energy-efficient street lights for small cities. You will build weekly reports on lamp failures and
+      energy use, clean data from field crews, and help the operations team decide which streets to upgrade first.</p>
+  </section>
+
+  <form id="application" novalidate>
+    <fieldset>
+      <legend>Your details</legend>
+      <div class="row">
+        <label><span>First name <span class="req">*</span></span><input type="text" name="first_name" autocomplete="given-name" required></label>
+        <label><span>Last name <span class="req">*</span></span><input type="text" name="last_name" autocomplete="family-name" required></label>
+      </div>
+      <div class="row">
+        <label><span>Email <span class="req">*</span></span><input type="email" name="email" autocomplete="email" required></label>
+        <label><span>Phone <span class="req">*</span></span><input type="tel" name="phone" autocomplete="tel" required></label>
+      </div>
+      <div class="row">
+        <label>City <input type="text" name="city"></label>
+        <label>LinkedIn profile <input type="url" name="linkedin" placeholder="https://linkedin.com/in/..."></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your CV</legend>
+      <label><span>Upload your CV <span class="req">*</span></span>
+        <input type="file" name="resume" accept=".pdf,.doc,.docx,.txt" required>
+        <span class="hint">PDF or Word.</span>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>A few questions</legend>
+      <label><span>Are you legally authorized to work in the United States? <span class="req">*</span></span>
+        <select name="work_authorization" required>
+          <option value="">Select...</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </label>
+      <div>
+        <p style="margin:0 0 6px;font-weight:600">Will you now or in the future require visa sponsorship? <span class="req">*</span></p>
+        <div class="choices" role="radiogroup" aria-label="Will you now or in the future require visa sponsorship?">
+          <label><input type="radio" name="sponsorship" value="Yes" required> Yes</label>
+          <label><input type="radio" name="sponsorship" value="No"> No</label>
+        </div>
+      </div>
+      <label>How did you hear about this job?
+        <select name="source">
+          <option value="">Select...</option>
+          <option>Company website</option>
+          <option>LinkedIn</option>
+          <option>Job board</option>
+          <option>A friend or employee</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label><span>Why do you want to work at Globex Lighting? <span class="req">*</span></span>
+        <textarea name="why_us" required></textarea>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Voluntary self-identification</legend>
+      <p class="hint" style="margin:0">Answering is optional and does not affect your application. phil only answers from what you saved.</p>
+      <label>Gender
+        <select name="gender">
+          <option value="">Select...</option>
+          <option>Female</option>
+          <option>Male</option>
+          <option>Non-binary</option>
+          <option>I prefer not to say</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <label class="choices" style="font-weight:400"><input type="checkbox" name="agree" required> I confirm the information above is true.</label>
+
+    <div><button class="btn" type="submit">Submit application</button></div>
+    <p class="demo-done" id="done" role="status">This is a practice form: nothing was sent. When you apply for real, you check the answers and press Submit yourself. phil never submits for you.</p>
+  </form>
+</main>
+
+<footer class="foot">
+  <div class="foot-brand">
+    <span class="brand-phil" data-phil="calm"></span>
+    <span class="wordmark">phil<span>form</span></span>
+  </div>
+  <nav aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/support">Support</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+  </nav>
+  <p class="fine">© 2026 philform.</p>
+</footer>
+
+<script type="module">
+  import { drawPhils } from '/phil.js';
+  drawPhils();
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8), { passive: true });
+  // Practice only: the form goes nowhere.
+  document.getElementById('application').addEventListener('submit', e => {
+    e.preventDefault();
+    const done = document.getElementById('done');
+    done.classList.add('on');
+    done.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+</script>
+</body>
+</html>

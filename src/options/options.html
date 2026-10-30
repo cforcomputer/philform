@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>philform settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <h1 class="brand"><span class="logo" data-phil="calm"></span><span class="wordmark">phil<span>form</span></span></h1>
+      <span class="badge dev dev-only" id="dev-badge" title="Parts marked like this exist only in the build tools/dev.py makes">Dev build</span>
+      <nav class="tabs" id="tabs">
+        <button class="tab" data-tab="profile" type="button" title="Your CV and details">Profile</button>
+        <button class="tab" data-tab="settings" type="button" title="Keys and how phil fills">Settings</button>
+        <button class="tab" data-tab="responses" type="button" title="Answers you wrote once, reused on every form">Saved answers</button>
+        <!-- Dev build only: what phil learns per site is checked on every fill
+             and kept up by itself; nothing here needs a user's hand. -->
+        <button class="tab dev-only" data-tab="skills" type="button" title="What phil remembers about each site">Site skills</button>
+        <button class="tab" data-tab="history" type="button" title="Every fill and what it cost">History</button>
+        <button class="tab" data-tab="data" type="button" title="Back up, move or delete your data">Data</button>
+      </nav>
+      <button id="tour-start" class="link tour-link" type="button" title="phil shows you around again">Take the tour</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- With the password lock closed, nothing else on the page can be read. -->
+    <section id="lock-screen" class="lock-screen" hidden>
+      <span class="lock-phil" data-phil="calm"></span>
+      <h2>philform is locked</h2>
+      <p class="hint">Your details are locked with a password. Enter it to open them.</p>
+      <form id="unlock-form" class="unlock-form">
+        <input id="unlock-password" type="password" autocomplete="current-password" placeholder="Your philform password" aria-label="Your philform password">
+        <button class="primary" type="submit">Unlock</button>
+      </form>
+      <p class="hint bad-text" id="unlock-result"></p>
+      <details class="inline forgot">
+        <summary>Forgot your password?</summary>
+        <p class="hint">There is no way to recover it: that is what keeps the lock safe. You can delete everything
+          and start over, then import a backup if you made one.</p>
+        <button id="lock-wipe" class="danger" type="button">Delete everything and start over</button>
+      </details>
+    </section>
+
+    <div id="welcome" class="banner" hidden>
+      <strong>Welcome.</strong> Upload your CV and fill in your profile below<span class="dev-only">, then add your keys on the Settings tab</span>.
+      phil has nothing to type into a form until you do.
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <!-- Profile -------------------------------------------------------- -->
+    <section class="panel" id="panel-profile">
+      <div class="rowline panel-head">
+        <p class="intro">
+          This is what phil puts into application forms. Everything stays on this
+          computer. Values are sent to a model only when a form actually asks for them.
+          Click a section to open it.
+        </p>
+        <span class="openall">
+          <button class="link" type="button" data-blocks="open">Open all</button> ·
+          <button class="link" type="button" data-blocks="close">Close all</button>
+        </span>
+      </div>
+
+      <div id="profile-sections">
+        <details class="block" data-block="p-cv" open>
+          <summary>
+            <span class="block-title">Your CV</span>
+            <span class="block-blurb">Start here: upload your CV and phil reads it.</span>
+            <span class="block-count" id="cv-count"></span>
+          </summary>
+          <div class="block-body">
+            <div id="documents-list"></div>
+            <div class="rowline uploads">
+              <label class="filebtn">
+                <span id="upload-resume-label">Upload a CV</span>
+                <input id="upload-resume" type="file" accept=".pdf,.doc,.docx,.txt,.rtf" hidden>
+              </label>
+              <label class="filebtn">
+                Upload a cover letter
+                <input id="upload-coverLetter" type="file" accept=".pdf,.doc,.docx,.txt,.rtf" hidden>
+              </label>
+            </div>
+            <p class="hint" id="cv-many-hint">
+              A CV for each kind of job? Add each one and say what jobs it is for.
+              phil sends the one that fits each job, and writes your answers from it.
+            </p>
+            <label class="check"><input type="checkbox" id="attachDocuments"> Attach these files when a form asks for a CV or cover letter</label>
+            <p class="hint">
+              Only the files stored here, and only to an upload box the page presents as
+              wanting a CV or cover letter. phil never reads a file from your computer.
+            </p>
+            <p class="resume-read" id="resume-read"></p>
+            <details class="inline" id="resume-text-box">
+              <summary id="resume-text-summary">Paste your CV as text instead</summary>
+              <p class="hint">phil writes answers to open questions from this text. Correct anything it misread.</p>
+              <div id="resume-text-holder"></div>
+            </details>
+            <h3 class="sub">More about your work <span class="hint">(optional)</span></h3>
+            <p class="hint">phil also draws on these when it writes answers for you.</p>
+            <div id="documents-fields"></div>
+          </div>
+        </details>
+        <div id="profile-dynamic"></div>
+      </div>
+      <div class="sticky-save">
+        <button id="save-profile" class="primary" type="button">Save profile</button>
+        <span class="hint" id="profile-count"></span>
+      </div>
+    </section>
+
+    <!-- Settings ------------------------------------------------------- -->
+    <section class="panel" id="panel-settings" hidden>
+      <p class="intro">
+        How phil fills forms. Your own details are on the Profile tab. The defaults
+        suit almost everyone.
+      </p>
+
+      <details class="block dev-only" data-block="s-keys" open>
+        <summary>
+          <span class="block-title">AI accounts <span class="badge dev">Dev build only</span></span>
+          <span class="block-blurb">The keys phil uses to read forms and write answers.</span>
+        </summary>
+        <div class="block-body">
+          <div class="direct-only">
+            <label class="row">
+              <span>TypeSafe key</span>
+              <input id="typesafeApiKey" type="password" autocomplete="off" placeholder="apikey_...">
+            </label>
+            <p class="hint indent">Needed for every fill: TypeSafe works out what each box on a form is asking.</p>
+            <label class="row">
+              <span>DeepSeek key</span>
+              <input id="deepseekApiKey" type="password" autocomplete="off" placeholder="sk-...">
+            </label>
+            <p class="hint indent">Needed only when phil writes answers for you (see Written answers below).</p>
+            <div class="rowline start">
+              <button class="secondary" id="test-typesafe" type="button">Test TypeSafe</button>
+              <button class="secondary" id="test-deepseek" type="button">Test DeepSeek</button>
+            </div>
+          </div>
+          <div id="proxy-fields" hidden>
+            <label class="row">
+              <span>Service address</span>
+              <input id="proxyUrl" type="url" placeholder="https://api.philform.example">
+            </label>
+            <label class="row">
+              <span>Account token</span>
+              <input id="proxyToken" type="password" autocomplete="off" placeholder="Made for you on your first fill">
+            </label>
+            <p class="hint">
+              Your first 10 applications are free; after that each fill takes what it used from
+              your wallet, which you top up from the popup. The service is
+              <code>backend/server.mjs</code>; README.md describes its endpoints.
+            </p>
+          </div>
+        </div>
+      </details>
+
+      <details class="block" data-block="s-filling" open>
+        <summary>
+          <span class="block-title">Filling forms</span>
+          <span class="block-blurb">What phil fills, and how it shows you what it did.</span>
+        </summary>
+        <div class="block-body">
+          <label class="row">
+            <span>Past jobs on a form</span>
+            <select id="fillEmploymentHistory">
+              <option value="all">Fill as many as the form offers</option>
+              <option value="first">Fill only my most recent job</option>
+            </select>
+          </label>
+          <p class="hint indent">
+            phil fills one job block per saved job, most recent first, from the history on
+            the Profile tab, and presses the form's "Add another" to make room for them.
+          </p>
+          <label class="check"><input type="checkbox" id="fillDemographics"> Answer voluntary demographic questions from my profile</label>
+          <p class="hint">
+            Gender, race, veteran and disability questions. Answers you typed on the
+            Profile tab are always used. With this ticked, a question you left blank
+            gets the form's "prefer not to say".
+          </p>
+          <label class="check"><input type="checkbox" id="passBackgroundCheck"> I can pass a background and reference check</label>
+          <p class="hint">
+            Many forms ask before an offer. Untick it and phil leaves that question for you.
+          </p>
+          <label class="check"><input type="checkbox" id="highlightFilled"> Outline filled boxes so I can check them</label>
+          <label class="check"><input type="checkbox" id="overwriteExisting"> Replace what was already typed in a box</label>
+        </div>
+      </details>
+
+      <details class="block" data-block="s-writing" open>
+        <summary>
+          <span class="block-title">Written answers</span>
+          <span class="block-blurb">Open questions like "Why do you want to work here?"</span>
+        </summary>
+        <div class="block-body">
+          <label class="switch-row">
+            <input type="checkbox" id="writeAnswers" class="switch">
+            <span>
+              <b>phil writes answers with DeepSeek</b>
+              <span class="hint block-line">
+                When none of your saved answers fits, DeepSeek drafts one from your CV and
+                projects, in your voice. A saved answer is always tried first: it is free and
+                the words are yours.
+              </span>
+            </span>
+          </label>
+          <div id="writer-on">
+            <label class="row">
+              <span>Longest answer (words)</span>
+              <input id="longAnswerMaxWords" type="number" min="40" max="600" step="10">
+            </label>
+            <label class="check"><input type="checkbox" id="whyUsResearch"> Look up the company for "Why us?" questions</label>
+            <p class="hint">
+              phil reads up on the company and thinks the answer through before writing it.
+              These answers can make or break an application. Adds a few cents and about ten seconds.
+            </p>
+            <h3 class="sub">Your own DeepSeek key <span class="hint">(optional)</span></h3>
+            <label class="row">
+              <span>DeepSeek key</span>
+              <input id="ownDeepseekKey" type="password" autocomplete="off" placeholder="sk-...">
+            </label>
+            <p class="hint">
+              Have a DeepSeek account? Paste its key here and phil writes with it: the writing
+              is billed by DeepSeek to you, and your philform wallet pays only for reading the
+              form. Your key stays in this browser and is never sent to philform.
+            </p>
+            <div class="rowline start">
+              <button class="secondary" id="test-own-deepseek" type="button">Test my key</button>
+              <span class="hint" id="own-key-result"></span>
+            </div>
+          </div>
+          <div id="writer-off" hidden>
+            <label class="check"><input type="checkbox" id="useSavedAnswers"> Still fill them with my saved answers</label>
+            <p class="hint">Untick to leave every long text box for you to write by hand.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="block" data-block="s-time" open>
+        <summary>
+          <span class="block-title">Time saved</span>
+          <span class="block-blurb">What each fill is worth to you.</span>
+        </summary>
+        <div class="block-body">
+          <label class="row">
+            <span>Your time is worth ($ per hour)</span>
+            <input id="hourlyWage" type="number" min="0" max="1000" step="0.5">
+          </label>
+          <p class="hint indent">After each fill phil shows the time it saved you and what that time is worth at this rate. You can also change it in the popup.</p>
+        </div>
+      </details>
+
+      <details class="block" data-block="s-learning" open>
+        <summary>
+          <span class="block-title">Learning and history</span>
+          <span class="block-blurb">What phil remembers between fills.</span>
+        </summary>
+        <div class="block-body">
+          <label class="check"><input type="checkbox" id="learnSkills"> Remember each site, so the next application there is faster</label>
+          <label class="check"><input type="checkbox" id="keepRunHistory"> Keep a list of my fills (History tab)</label>
+          <label class="check"><input type="checkbox" id="redactHistory"> In that list, leave out what was typed</label>
+        </div>
+      </details>
+
+      <details class="block" data-block="s-advanced">
+        <summary>
+          <span class="block-title">Advanced <span class="badge">For developers</span></span>
+          <span class="block-blurb">Models, connection and tuning. Leave these alone unless you know you need them.</span>
+        </summary>
+        <div class="block-body">
+          <div class="dev-only">
+          <h3 class="sub">Connection</h3>
+          <label class="row">
+            <span>Mode</span>
+            <select id="mode">
+              <option value="direct">Direct - my own API keys on this machine</option>
+              <option value="proxy">philform's service - pay as you go from a wallet</option>
+            </select>
+          </label>
+          <p class="hint indent">
+            Direct mode is right for local testing. Before selling philform, switch to a
+            hosted backend: an unpacked extension's source is readable by anyone who installs
+            it, so a shipped API key is a published API key.
+          </p>
+          </div>
+
+          <div class="direct-only">
+            <h3 class="sub">Field matching</h3>
+            <label class="row">
+              <span>Engine</span>
+              <select id="classifier">
+                <option value="typesafe">TypeSafe (recommended)</option>
+                <option value="deepseek">DeepSeek</option>
+              </select>
+            </label>
+            <p class="hint indent">
+              On the twenty-field benchmark in <code>tools/test-live.py</code> both placed every
+              field correctly. TypeSafe was about five times cheaper and eight times faster, and it
+              answers with a typed choice, so it can only return a value your profile actually holds
+              or an option the page actually offers.
+            </p>
+            <div id="typesafe-fields">
+              <label class="row">
+                <span>TypeSafe model</span>
+                <select id="typesafeModel"></select>
+              </label>
+              <label class="row">
+                <span>Minimum confidence</span>
+                <input id="classifierConfidence" type="number" min="0" max="1" step="0.05">
+              </label>
+              <p class="hint indent">
+                Below this, a field is filled with a best guess outlined in amber for you to check.
+                0.6 is a sensible default.
+              </p>
+            </div>
+            <div id="deepseek-classify">
+              <label class="row">
+                <span>DeepSeek model</span>
+                <select id="deepseekModel"></select>
+              </label>
+              <label class="row">
+                <span>Reasoning effort</span>
+                <select id="deepseekClassifyEffort"></select>
+              </label>
+              <p class="hint indent">
+                Matching a stored value to a labelled box needs no deliberation, and reasoning tokens
+                are billed at the output rate. None is the right default here.
+              </p>
+            </div>
+            <label class="check"><input type="checkbox" id="useHeuristicsFirst"> Match common fields locally before calling a model</label>
+
+            <h3 class="sub">Writer</h3>
+            <label class="row">
+              <span>Writer model</span>
+              <select id="deepseekWriterModel"></select>
+            </label>
+            <label class="row">
+              <span>Reasoning effort</span>
+              <select id="deepseekWriterEffort"></select>
+            </label>
+            <p class="hint indent">
+              Thinking is billed at the output rate and is poor value on these prompts: Low cost
+              roughly eight times more than None for answers of the same quality.
+            </p>
+          </div>
+
+          <div class="dev-only">
+            <h3 class="sub">Site skills</h3>
+            <label class="row">
+              <span>Flag fills slower than (seconds)</span>
+              <input id="slowRunThresholdSec" type="number" min="2" max="120" step="1">
+            </label>
+            <p class="hint indent">Slow sites show a warning on the Site skills tab so their mappings can be checked.</p>
+          </div>
+        </div>
+      </details>
+
+      <div class="sticky-save">
+        <button id="save-settings" class="primary" type="button">Save settings</button>
+        <span class="hint" id="test-result"></span>
+      </div>
+    </section>
+
+    <!-- Responses ------------------------------------------------------ -->
+    <section class="panel" id="panel-responses" hidden>
+      <p class="intro">
+        Answers you have already written, reused whenever a form asks the same thing. A saved
+        response is filled exactly as you wrote it, with no model call, so it is the cheapest
+        and the best-sounding option for long questions.
+      </p>
+
+      <details class="block" data-block="r-how">
+        <summary>
+          <span class="block-title">How matching works</span>
+          <span class="block-blurb">phil finds the right saved answer however a form words the question.</span>
+        </summary>
+        <div class="block-body">
+        <p class="hint">
+          phil reads each long question on the page and decides whether one of your
+          saved answers answers it, by meaning rather than wording. "Where do you see yourself
+          in five years", "What are your long-term career goals" and "Describe your career
+          aspirations" all find the same saved answer. You do not have to anticipate the
+          phrasing.
+        </p>
+        <p class="hint">
+          The answer text itself is the main signal, so write it as you would actually submit
+          it. Example phrasings are optional: they are a shortcut that skips the matching step
+          when the wording is exact, not a requirement.
+        </p>
+        <p class="hint">
+          Use <code>{{company}}</code> and <code>{{role}}</code> to drop in the employer and
+          job title from the page you are applying on. Any profile field works too, such as
+          <code>{{identity.firstName}}</code>. A placeholder with nothing to fill it is removed.
+        </p>
+      </div>
+      </details>
+
+      <div id="responses-list" class="list"></div>
+
+      <div class="sticky-save">
+        <button id="add-response" class="primary" type="button">Add a response</button>
+        <button id="seed-responses" class="secondary" type="button">Add starter examples</button>
+        <button id="save-responses" class="primary" type="button">Save responses</button>
+        <span class="hint" id="responses-count"></span>
+      </div>
+    </section>
+
+    <!-- Skills --------------------------------------------------------- -->
+    <section class="panel dev-only" id="panel-skills" hidden>
+      <p class="intro">
+        One skill per site. phil records every field a site offers, whether or not it
+        managed to fill it, so the ones it got wrong are visible and correctable. A remembered
+        field is answered with no model call, which is what makes a second application on the
+        same site fast.
+      </p>
+      <p class="intro">
+        Fields needing attention are listed first. Set what a field should draw on, then save.
+        Changing a row locks it, so a later run never overwrites your correction.
+      </p>
+
+      <div class="rowline" style="margin-bottom:14px">
+        <label class="filebtn" style="margin:0">
+          Add a shared skill
+          <input id="adopt-skill" type="file" accept="application/json" hidden>
+        </label>
+        <button id="forget-all-skills" class="danger" type="button" hidden>Forget all sites</button>
+      </div>
+
+      <div id="skills-list" class="list"></div>
+    </section>
+
+    <!-- History -------------------------------------------------------- -->
+    <section class="panel" id="panel-history" hidden>
+      <div class="rowline">
+        <p class="intro" id="usage-summary"></p>
+        <button id="clear-runs" class="secondary" type="button">Clear history</button>
+      </div>
+      <div id="runs-list" class="list"></div>
+    </section>
+
+    <!-- Data ----------------------------------------------------------- -->
+    <section class="panel" id="panel-data" hidden>
+      <details class="block" data-block="d-export" open>
+        <summary>
+          <span class="block-title">Portable configuration</span>
+          <span class="block-blurb">Back up your setup, or move it to another browser.</span>
+        </summary>
+        <div class="block-body">
+        <p class="hint">
+          Export writes a single file holding everything ticked below. Import it on another
+          browser or another machine to arrive with the same setup. The same file works for
+          both Chrome and Firefox.
+        </p>
+        <div id="export-parts"></div>
+        <label class="check dev-only" style="margin-top:10px">
+          <input type="checkbox" id="includeKeys"> Include API keys and licence token
+        </label>
+        <p class="hint dev-only">
+          Off by default. An export usually ends up in a downloads folder or a chat message,
+          and anyone holding the file could then spend against your account. Tick it only when
+          you are moving machines, and delete the file afterwards.
+        </p>
+        <div style="margin-top:12px">
+          <button id="export" class="secondary" type="button">Export to file</button>
+          <label class="filebtn">
+            Import from file
+            <input id="import" type="file" accept="application/json" hidden>
+          </label>
+        </div>
+        <p class="hint dev-only"><span class="badge dev">Dev build only</span>
+          Export saves to <code>.dev/personal-config.json</code> in the project (without API keys)
+          instead of downloading. The dev tools fill with that profile.</p>
+        <p class="hint" id="import-result"></p>
+      </div>
+      </details>
+      <details class="block" data-block="d-account" open>
+        <summary>
+          <span class="block-title">Keep your wallet</span>
+          <span class="block-blurb" id="account-blurb">So you keep your money and history if you reinstall.</span>
+        </summary>
+        <div class="block-body">
+        <p class="hint" id="account-linked" hidden></p>
+        <div id="account-form">
+          <p class="hint">
+            Add your email and your wallet stays yours if you reinstall philform or move to another computer.
+            Used philform before? Enter the same email to bring your old wallet back. Optional: we only send
+            a code, never newsletters.
+          </p>
+          <form id="email-form" class="rowline start">
+            <input id="account-email" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Your email">
+            <button class="secondary" type="submit" id="email-send">Send me a code</button>
+          </form>
+          <form id="code-form" class="rowline start" hidden>
+            <input id="account-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" aria-label="The code from the email">
+            <button class="primary" type="submit">Confirm</button>
+          </form>
+        </div>
+        <p class="hint" id="account-result"></p>
+      </div>
+      </details>
+      <details class="block" data-block="d-lock" open>
+        <summary>
+          <span class="block-title">Password lock</span>
+          <span class="block-blurb" id="lock-blurb">Optional: lock your details with a password.</span>
+        </summary>
+        <div class="block-body">
+        <div id="lock-off">
+          <p class="hint">
+            With a password, your profile, CV and saved answers are stored encrypted. phil asks for the password
+            once each time you open your browser. <b>If you forget it, your details cannot be recovered</b>,
+            so export a backup first.
+          </p>
+          <form id="lock-form" class="lock-grid">
+            <input id="lock-new" type="password" autocomplete="new-password" placeholder="New password (6 or more characters)" aria-label="New password">
+            <input id="lock-repeat" type="password" autocomplete="new-password" placeholder="The same password again" aria-label="Repeat the password">
+            <button class="primary" type="submit">Turn on the lock</button>
+          </form>
+        </div>
+        <div id="lock-on" hidden>
+          <p class="hint">Your details are locked with a password. They open for this browser session only.</p>
+          <div class="rowline start">
+            <button id="lock-now" class="secondary" type="button">Lock now</button>
+          </div>
+          <details class="inline">
+            <summary>Change the password or turn the lock off</summary>
+            <form id="lock-change" class="lock-grid">
+              <input id="lock-current" type="password" autocomplete="current-password" placeholder="Current password" aria-label="Current password">
+              <input id="lock-next" type="password" autocomplete="new-password" placeholder="New password" aria-label="New password">
+              <button class="secondary" type="submit">Change password</button>
+              <button id="lock-off-btn" class="danger" type="button">Turn the lock off</button>
+            </form>
+          </details>
+        </div>
+        <p class="hint" id="lock-result"></p>
+      </div>
+      </details>
+      <details class="block" data-block="d-issues" open>
+        <summary>
+          <span class="block-title">Reported issues</span>
+          <span class="block-blurb">Pages you reported from the popup.</span>
+        </summary>
+        <div class="block-body">
+        <p class="hint">
+          Pages you reported from the popup, with what each fill did and what the page showed.
+          They stay in this browser; download them to share for debugging.
+        </p>
+        <p class="hint" id="issues-count"></p>
+        <div style="margin-top:8px">
+          <button id="issues-download" class="secondary" type="button">Download reports</button>
+          <button id="issues-clear" class="danger" type="button">Clear reports</button>
+        </div>
+      </div>
+      </details>
+      <details class="block" data-block="d-wipe" open>
+        <summary>
+          <span class="block-title">Delete everything</span>
+          <span class="block-blurb">Remove all philform data from this browser.</span>
+        </summary>
+        <div class="block-body">
+        <p class="hint">Removes the profile, every site skill, all history and your saved keys from this browser.</p>
+        <button id="wipe" class="danger" type="button">Delete all philform data</button>
+      </div>
+      </details>
+    </section>
+  </main>
+
+  <script type="module" src="options.js"></script>
+  <script type="module" src="tour.js"></script>
+</body>
+</html>
